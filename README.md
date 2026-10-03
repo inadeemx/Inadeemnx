@@ -1,2 +1,2 @@
 # Inadeemnx
-Personally discord
+Don’t visit again hahahahah😅
