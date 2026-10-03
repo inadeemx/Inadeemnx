@@ -1,0 +1,2 @@
+# Inadeemnx
+Personally discord
