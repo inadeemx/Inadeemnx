@@ -431,7 +431,7 @@ body.admin-mode{padding-bottom:0}
     </div>
     <div class="copy">
       <span>© 2026 Saanjh Studio. All rights reserved.</span>
-      <span>Prices in Indian rupees, inclusive of GST. · <a href="#admin">Admin login</a></span>
+      <span>Prices in Indian rupees, inclusive of GST.</span>
     </div>
   </div>
 </footer>
@@ -473,6 +473,8 @@ body.admin-mode{padding-bottom:0}
 const SUPABASE_URL = "https://unyncyejykidktrefoza.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVueW5jeWVqeWtpZGt0cmVmb3phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyOTk0ODAsImV4cCI6MjEwOTg3NTQ4MH0.oD2eJi6obX2GChyIfxJcO3tOwnyQCfloRoN80gX1jr8";   // public key, safe to keep in the page
 const ADMIN_EMAIL = "inaademx@gmail.com";
+const ADMIN_PAGE = false;   // true only in admin.html
+const STORE_LINK = ADMIN_PAGE ? "index.html" : "#top";
 const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 let LOADING = !!sb, DB_ERROR = false;
 
@@ -836,7 +838,7 @@ function renderNotConnected(){
   $("#adminView").innerHTML=`<div class="login"><div class="panel">
     <div class="logo">SAANJH<small>Admin</small></div>
     <p class="note">This website isn't connected to its database yet. Add the Supabase project URL and anon key at the top of the script (SUPABASE_URL and SUPABASE_ANON_KEY), then reload.</p>
-    <p style="margin-top:16px"><a href="#top" class="note" style="text-decoration:underline">Back to store</a></p>
+    <p style="margin-top:16px"><a href="${STORE_LINK}" class="note" style="text-decoration:underline">Back to store</a></p>
   </div></div>`;
 }
 
@@ -852,7 +854,7 @@ function renderLogin(msg, mode){
       <p class="adm-msg ${msg&&msg.kind?msg.kind:"e"}" id="loginMsg" aria-live="polite">${msg?esc(msg.text||msg):""}</p>
       <button class="btn full" type="submit">${signup?"Create admin account":"Log in"}</button>
       <button class="sm" type="button" id="switchMode" style="justify-self:center">${signup?"I already have a password":"First time here? Create your admin password"}</button>
-      <a href="#top" class="note" style="text-align:center;text-decoration:underline">Back to store</a>
+      <a href="${STORE_LINK}" class="note" style="text-align:center;text-decoration:underline">Back to store</a>
     </form></div></div>`;
   setTimeout(()=>{const p=$("#admPass");if(p)p.focus()},30);
   $("#switchMode").onclick=()=>renderLogin(null, signup?"login":"signup");
@@ -899,7 +901,7 @@ function renderAdmin(){
   <div class="adm-bar"><div class="wrap">
     <div class="logo">SAANJH<small style="color:#a8a6a2">Admin · ${esc(adm.email||"")}</small></div>
     <div class="actions">
-      <a class="btn" href="#top">View store</a>
+      <a class="btn" href="${STORE_LINK}">View store</a>
       <button class="btn" id="admLogout">Log out</button>
     </div></div></div>
   <div class="wrap">
@@ -1054,7 +1056,7 @@ $("#adminView").addEventListener("click",async e=>{
   }
 });
 async function route(){
-  const isAdmin=location.hash==="#admin";
+  const isAdmin=ADMIN_PAGE||location.hash==="#admin";
   document.body.classList.toggle("admin-mode",isAdmin);
   closeAll();
   if(!isAdmin) return;
