@@ -169,6 +169,8 @@ footer address{font-style:normal;font-size:14px;line-height:1.8}
 .modal{position:fixed;inset:0;display:grid;place-items:center;z-index:100;padding:16px;visibility:hidden;opacity:0;transition:.2s}
 .modal.on{visibility:visible;opacity:1}
 .modal .box{background:var(--surface);width:min(920px,100%);max-height:92vh;overflow:auto;position:relative}
+.modal .box:has(> .text-box), .modal .box:has(> .search-box){width:auto;min-width:min(420px,100%)}
+.modal .box:has(> .search-box){width:min(640px,100%)}
 .modal .x{position:absolute;top:12px;right:12px;z-index:2;background:var(--surface)}
 .pd{display:grid;grid-template-columns:1fr 1fr}
 .pd .art{aspect-ratio:3/4;border-right:1px solid var(--line)}
@@ -516,7 +518,7 @@ async function loadFromDb(){
   ]);
   if(p.error) throw p.error;
   PRODUCTS = p.data.map(rowToProduct);
-  if(s.data) Object.assign(STORE,{whatsapp:s.data.whatsapp,freeShipAbove:s.data.free_ship_above,shipping:s.data.shipping});
+  if(s.data) Object.assign(STORE,{whatsapp:s.data.whatsapp,freeShipAbove:s.data.free_ship_above,shipping:s.data.shipping,phoneLogin:!!s.data.phone_login});
 }
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
@@ -532,7 +534,7 @@ const SHAPES = {
   skirt:'M62 132 L138 132 L160 244 L40 244 Z'
 };
 function patternDef(id,p){
-  const {pat,c1,c2} = p;
+  const pat=p.pat, c1=p.c1||"#d9d6cf", c2=p.c2||"#f1efea";
   if(pat==="dots") return `<pattern id="${id}" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="${c1}"/><circle cx="7" cy="7" r="2" fill="${c2}"/></pattern>`;
   if(pat==="stripe") return `<pattern id="${id}" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="${c1}"/><rect width="3" height="10" fill="${c2}"/></pattern>`;
   if(pat==="check") return `<pattern id="${id}" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="${c2}"/><rect width="16" height="5" fill="${c1}" opacity=".7"/><rect width="5" height="16" fill="${c1}" opacity=".7"/></pattern>`;
@@ -734,7 +736,7 @@ function openCheckout(){
   $("#coForm").addEventListener("submit",e=>{
     e.preventDefault();
     const lines = cart.map(l=>{const p=byId(l.id);return `• ${p.name} | Size ${l.size} | Qty ${l.qty} | ${rs(p.price*l.qty)}`}).join("\n");
-    const msg = `New order – ${STORE.name}\n\n${lines}\nShipping: ${ship?rs(ship):"Free"}\nTotal: ${rs(st+ship)}\n\nName: ${$("#coName").value}\nPhone: ${$("#coPhone").value}\nAddress: ${$("#coAddr").value}`;
+    const msg = `New order – ${STORE.name}\n\n${lines}\nShipping: ${ship?rs(ship):"Free"}\nTotal: ${rs(st+ship)}\n\nName: ${$("#coName").value}\nPhone: ${$("#coPhone").value}${CUSTOMER?"\nLogged in as: "+who(CUSTOMER):""}\nAddress: ${$("#coAddr").value}`;
     const url = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
     $("#coForm").style.display="none";
     $("#coDone").innerHTML = `<p style="color:var(--ink);margin:16px 0 12px">Almost done. Tap below to send your order to us on WhatsApp.</p><a class="btn full" href="${url}" target="_blank" rel="noopener">Open WhatsApp</a><p class="note" style="margin-top:10px">WhatsApp: +${STORE.whatsapp}</p>`;
@@ -759,7 +761,7 @@ document.addEventListener("click",e=>{
   if(d.page){openPage(d.page);return}
   if(d.open==="cart"){openCart();return}
   if(d.open==="search"){openSearch();return}
-  if(d.open==="account"){openPage("account");return}
+  if(d.open==="account"){openAccount();return}
   if(d.wish){
     const id=+d.wish; const on=wish.includes(id);
     wish = on? wish.filter(x=>x!==id) : wish.concat(id);
@@ -772,9 +774,8 @@ document.addEventListener("click",e=>{
     const sel=document.querySelector('#sizes [aria-pressed="true"]');
     if(!sel){$("#sizeErr").textContent="Please choose a size first.";return}
     const id=+d.add,size=sel.dataset.size;
-    const ex=cart.find(l=>l.id===id&&l.size===size);
-    ex?ex.qty++:cart.push({id,size,qty:1});
-    $("#modal").classList.remove("on");openCart();toast("Added to cart");return;
+    if(sb && !CUSTOMER){PENDING_ADD={id,size};openCustomerLogin("Log in to add this to your cart.");return}
+    addToCart(id,size);return;
   }
   if(d.inc){cart[+d.inc].qty++;renderCart();return}
   if(d.dec){const l=cart[+d.dec];l.qty>1?l.qty--:cart.splice(+d.dec,1);renderCart();return}
@@ -803,6 +804,141 @@ async function init(){
   renderNav();renderGrid();renderCart();
 }
 init();
+
+/* =====================================================================
+   CUSTOMER LOGIN  (email + one-time code sent to the customer's inbox)
+   Asked for the first time a customer taps "Add to cart".
+   ===================================================================== */
+let CUSTOMER = null;        // logged-in Supabase user, or null
+let PENDING_ADD = null;     // {id,size} waiting for login to finish
+const cl = { mode:"email", email:"", phone:"", reason:"", resendAt:0, timer:null };
+
+function addToCart(id,size){
+  const ex=cart.find(l=>l.id===id&&l.size===size);
+  ex?ex.qty++:cart.push({id,size,qty:1});
+  $("#modal").classList.remove("on");openCart();toast("Added to cart");
+}
+function who(u){return u ? (u.email || (u.phone ? "+"+String(u.phone).replace(/^\+/,"") : "your account")) : ""}
+function updateAccountUI(){
+  document.querySelectorAll('[data-open="account"]').forEach(b=>{
+    b.setAttribute("aria-label", CUSTOMER ? "Account: logged in as "+who(CUSTOMER) : "Log in");
+    b.style.color = CUSTOMER ? "var(--accent)" : "";
+  });
+}
+function otpErrorText(err){
+  const m=(err&&err.message)||"", code=(err&&err.code)||"", st=err&&err.status;
+  if(cl.mode==="phone" && (/provider|sms|phone.*(disabled|not enabled)|signups.*phone/i.test(m) || code==="sms_send_failed" || code==="phone_provider_disabled"))
+    return "Mobile login isn't working right now. Please log in with your email instead.";
+  if(code==="email_address_not_authorized"||/not authorized/i.test(m)) return "We can't send login codes right now. Please try again later, or order directly on WhatsApp.";
+  if(code==="over_email_send_rate_limit"||code==="over_sms_send_rate_limit"||st===429||/rate limit/i.test(m)) return "Too many codes were sent just now. Please wait a few minutes and try again.";
+  const s=m.match(/after (\d+) seconds?/i); if(s) return `Please wait ${s[1]} seconds before asking for a new code.`;
+  if(/invalid.*phone|phone.*invalid/i.test(m)) return "That mobile number doesn't look right. Enter your 10-digit number.";
+  if(/invalid.*email|email.*invalid|validate email/i.test(m)) return "That email address doesn't look right. Check it and try again.";
+  if(/Failed to fetch|network/i.test(m)) return "Couldn't connect. Check your internet and try again.";
+  return "Something went wrong. Please try again.";
+}
+function otpTarget(){ return cl.mode==="phone" ? {phone:"+91"+cl.phone} : {email:cl.email} }
+function sendOtp(){ return sb.auth.signInWithOtp(Object.assign(otpTarget(), {options:{shouldCreateUser:true}})) }
+
+function openCustomerLogin(reason){
+  if(reason) cl.reason=reason;
+  if(!STORE.phoneLogin) cl.mode="email";
+  const phone = cl.mode==="phone";
+  const tabs = STORE.phoneLogin ? `<div style="display:flex;gap:8px;margin-bottom:6px" role="group" aria-label="Log in with">
+      <button type="button" class="chip" id="tabEmail" aria-pressed="${!phone}">Email</button>
+      <button type="button" class="chip" id="tabPhone" aria-pressed="${phone}">Mobile number</button></div>` : "";
+  openModal(`<div class="text-box" style="max-width:460px">
+    <h2>Log in to continue</h2>
+    <p>${esc(cl.reason||"Log in to continue.")} ${phone?"We'll send a one-time code by SMS.":"We'll send a one-time code to your inbox."}</p>
+    ${tabs}
+    <form class="form" id="otpStartForm">
+      ${phone
+        ? `<div><label for="otpPhone">Mobile number</label>
+             <div style="display:flex;border:1px solid var(--line);background:var(--bg)"><span style="padding:11px 12px;border-right:1px solid var(--line);color:var(--muted)">+91</span>
+             <input id="otpPhone" type="tel" inputmode="numeric" autocomplete="tel-national" required pattern="[6-9][0-9]{9}" maxlength="10" value="${esc(cl.phone||"")}" placeholder="98XXXXXXXX" style="border:0;flex:1;min-width:0"></div></div>`
+        : `<div><label for="otpEmail">Email address</label><input id="otpEmail" type="email" autocomplete="email" required value="${esc(cl.email)}" placeholder="you@gmail.com"></div>`}
+      <p class="err" id="otpErr" aria-live="polite"></p>
+      <button class="btn full" type="submit" id="otpSend">Send code</button>
+      <p class="note">No password needed. New here? Your account is created automatically.</p>
+    </form></div>`);
+  setTimeout(()=>{const e=$(phone?"#otpPhone":"#otpEmail");if(e)e.focus()},50);
+  const te=$("#tabEmail"), tp=$("#tabPhone");
+  if(te) te.onclick=()=>{cl.mode="email";openCustomerLogin()};
+  if(tp) tp.onclick=()=>{cl.mode="phone";openCustomerLogin()};
+  $("#otpStartForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    if(phone){
+      const d=$("#otpPhone").value.replace(/\D/g,"").replace(/^(91|0)(?=\d{10}$)/,"");
+      if(!/^[6-9]\d{9}$/.test(d)){$("#otpErr").textContent="Enter your 10-digit mobile number.";return}
+      cl.phone=d;
+    } else cl.email=$("#otpEmail").value.trim().toLowerCase();
+    const btn=$("#otpSend"); btn.disabled=true; btn.textContent="Sending…"; $("#otpErr").textContent="";
+    const {error}=await sendOtp();
+    if(error){ $("#otpErr").textContent=otpErrorText(error); btn.disabled=false; btn.textContent="Send code"; return; }
+    cl.resendAt=Date.now()+60000;
+    openCodeStep();
+  });
+}
+function openCodeStep(){
+  const phone=cl.mode==="phone";
+  openModal(`<div class="text-box" style="max-width:460px">
+    <h2>${phone?"Check your messages":"Check your email"}</h2>
+    <p>We sent a login code to <strong style="color:var(--ink)">${phone?"+91 "+esc(cl.phone):esc(cl.email)}</strong>. ${phone?"It can take a minute to arrive.":"It can take a minute to arrive. Check Spam or Promotions too."}</p>
+    <form class="form" id="otpCodeForm">
+      <div><label for="otpCode">Login code</label><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required placeholder="6-digit code" style="font-size:22px;letter-spacing:.3em;text-align:center"></div>
+      <p class="err" id="otpErr" aria-live="polite"></p>
+      <button class="btn full" type="submit" id="otpVerify">Log in</button>
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <button class="rm" type="button" id="otpChange">${phone?"Use a different number":"Use a different email"}</button>
+        <button class="rm" type="button" id="otpResend" disabled>Send a new code</button>
+      </div>
+    </form></div>`);
+  setTimeout(()=>{const c=$("#otpCode");if(c)c.focus()},50);
+  const tick=()=>{const b=$("#otpResend");if(!b){clearInterval(cl.timer);return}
+    const left=Math.ceil((cl.resendAt-Date.now())/1000);
+    if(left>0){b.disabled=true;b.textContent=`Send a new code (${left}s)`}else{b.disabled=false;b.textContent="Send a new code";clearInterval(cl.timer)}};
+  clearInterval(cl.timer); cl.timer=setInterval(tick,1000); tick();
+  $("#otpChange").onclick=()=>openCustomerLogin();
+  $("#otpResend").onclick=async()=>{
+    const b=$("#otpResend"); b.disabled=true; b.textContent="Sending…";
+    const {error}=await sendOtp();
+    if(error){$("#otpErr").textContent=otpErrorText(error);}
+    else{$("#otpErr").textContent="";toast("New code sent");}
+    cl.resendAt=Date.now()+60000; clearInterval(cl.timer); cl.timer=setInterval(tick,1000); tick();
+  };
+  $("#otpCodeForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const token=$("#otpCode").value.replace(/\D/g,"");
+    const btn=$("#otpVerify"); btn.disabled=true; btn.textContent="Checking…"; $("#otpErr").textContent="";
+    const {data,error}=await sb.auth.verifyOtp(Object.assign(otpTarget(), {token, type: phone?"sms":"email"}));
+    if(error){
+      $("#otpErr").textContent=/expired|invalid/i.test(error.message||"") ? "That code is wrong or has expired. Use the latest code, or send a new one." : otpErrorText(error);
+      btn.disabled=false; btn.textContent="Log in"; return;
+    }
+    CUSTOMER=data.user; updateAccountUI(); clearInterval(cl.timer);
+    toast("You're logged in");
+    if(PENDING_ADD){const p=PENDING_ADD;PENDING_ADD=null;addToCart(p.id,p.size)} else closeAll();
+  });
+}
+function openAccount(){
+  if(!sb) return openPage("account");
+  if(!CUSTOMER) return openCustomerLogin("Log in to see your account.");
+  openModal(`<div class="text-box" style="max-width:460px">
+    <h2>Your account</h2>
+    <p>Logged in as <strong style="color:var(--ink)">${esc(who(CUSTOMER))}</strong></p>
+    <p>To track an order, message us on WhatsApp: +${esc(STORE.whatsapp)}</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn" id="acctCart">View cart</button>
+      <button class="btn ghost" id="acctOut">Log out</button>
+    </div></div>`);
+  $("#acctCart").onclick=()=>openCart();
+  $("#acctOut").onclick=async()=>{await sb.auth.signOut();CUSTOMER=null;updateAccountUI();closeAll();toast("Logged out")};
+}
+
+if(sb){
+  sb.auth.getSession().then(({data})=>{CUSTOMER=data&&data.session?data.session.user:null;updateAccountUI()});
+  sb.auth.onAuthStateChange((ev,session)=>{CUSTOMER=session?session.user:null;updateAccountUI()});
+}
 
 /* =====================================================================
    ADMIN  (open with  index.html#admin  or the "Admin login" link in the footer)
@@ -948,6 +1084,7 @@ function renderAdmin(){
               <div><label for="sFree">Free shipping above (Rs.)</label><input id="sFree" type="number" min="0" value="${STORE.freeShipAbove}"></div>
               <div><label for="sShip">Shipping charge (Rs.)</label><input id="sShip" type="number" min="0" value="${STORE.shipping}"></div>
             </div>
+            <div><label style="display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)"><input type="checkbox" id="sPhone" style="width:auto;margin-top:4px"${STORE.phoneLogin?" checked":""}> <span>Let customers log in with their mobile number<br><span class="note">Turn this on only after an SMS provider is set up in Supabase. Until then customers see email login only.</span></span></label></div>
             <p class="adm-msg" id="setMsg" aria-live="polite"></p>
             <button class="btn" type="submit">Save settings</button>
           </form>
@@ -1026,9 +1163,10 @@ function renderAdmin(){
     e.preventDefault();
     const wa=$("#sWa").value.trim(), free=Math.max(0,Math.round(+$("#sFree").value||0)), ship=Math.max(0,Math.round(+$("#sShip").value||0));
     setMsg("setMsg","Saving…","");
-    const {error}=await sb.from("settings").update({whatsapp:wa,free_ship_above:free,shipping:ship}).eq("id",1);
+    const phoneLogin=$("#sPhone").checked;
+    const {error}=await sb.from("settings").update({whatsapp:wa,free_ship_above:free,shipping:ship,phone_login:phoneLogin}).eq("id",1);
     if(error) return setMsg("setMsg",friendlyError(error),"e");
-    Object.assign(STORE,{whatsapp:wa,freeShipAbove:free,shipping:ship});
+    Object.assign(STORE,{whatsapp:wa,freeShipAbove:free,shipping:ship,phoneLogin});
     setMsg("setMsg","Settings saved.","s");
   };
   $("#pwForm").onsubmit=async e=>{
