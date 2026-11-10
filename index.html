@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saanjh Studio Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: Shopify-style minimal store. Centered wordmark, uppercase tracked nav, category tiles, 4-column product grid, slide-in cart drawer, mobile bottom bar. */
+:root{
+  --bg:#f5f4f1;
+  --surface:#ffffff;
+  --ink:#16171a;
+  --muted:#6d6a66;
+  --line:#e2dfda;
+  --accent:#2d3b8a;      /* indigo, block-print dye */
+  --accent-soft:#e7e9f4;
+  --rose:#b85a6b;
+  --display:"Bodoni Moda", "Didot", Georgia, serif;
+  --body:"Jost", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-weight:400;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:0}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-transform:inherit;letter-spacing:inherit}
+img,svg{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1320px;margin:0 auto;padding:0 24px}
+.caps{text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:500}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;line-height:1.15}
+
+/* Announcement */
+.announce{background:var(--ink);color:#f5f4f1;text-align:center;padding:9px 16px;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase}
+
+/* Header */
+header.site{position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid var(--line)}
+.head-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:18px 0 10px}
+.logo{font-family:var(--display);font-size:34px;letter-spacing:.06em;text-align:center;line-height:1}
+.logo small{display:block;font-family:var(--body);font-size:10px;letter-spacing:.42em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.icons{display:flex;justify-content:flex-end;gap:18px;align-items:center}
+.icon-btn{position:relative;display:flex;align-items:center;gap:6px;padding:6px 2px}
+.icon-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.4}
+.badge{position:absolute;top:-2px;right:-9px;min-width:17px;height:17px;border-radius:9px;background:var(--accent);color:#fff;font-size:10px;display:grid;place-items:center;padding:0 4px}
+.head-left{display:flex;gap:14px;align-items:center;color:var(--muted);font-size:12px;letter-spacing:.08em}
+nav.main{display:flex;justify-content:center;gap:34px;padding:6px 0 14px}
+nav.main > div{position:relative}
+nav.main .top{padding:6px 0;display:flex;align-items:center;gap:6px}
+nav.main .top:hover{color:var(--accent)}
+nav.main .top svg{width:9px;height:9px;stroke:currentColor;fill:none;stroke-width:1.6}
+.drop{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--line);min-width:220px;padding:12px 0;opacity:0;visibility:hidden;transition:opacity .18s;z-index:50}
+nav.main > div:hover .drop, nav.main > div:focus-within .drop{opacity:1;visibility:visible}
+.drop button{display:block;width:100%;text-align:left;padding:8px 22px;font-size:14px;letter-spacing:.02em;text-transform:none}
+.drop button:hover{background:var(--accent-soft);color:var(--accent)}
+.menu-toggle{display:none}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:1.15fr 1fr;gap:0;margin:28px auto 0;background:var(--surface);border:1px solid var(--line)}
+.hero-art{aspect-ratio:5/4;background:var(--accent);position:relative;overflow:hidden}
+.hero-art svg{width:100%;height:100%}
+.hero-copy{padding:56px 52px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.hero-copy .caps{color:var(--rose)}
+.hero-copy h1{font-size:clamp(34px,4.4vw,58px)}
+.hero-copy h1 em{font-style:italic;color:var(--accent)}
+.hero-copy p{color:var(--muted);max-width:42ch}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--ink);color:#fff;padding:14px 30px;text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:500;border:1px solid var(--ink);transition:background .2s,color .2s}
+.btn:hover{background:transparent;color:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:#fff}
+.btn.full{width:100%}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+
+/* Section heads */
+section{padding:72px 0 0}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(26px,3vw,36px)}
+.sec-head .link{border-bottom:1px solid currentColor;padding-bottom:2px}
+
+/* Category tiles */
+.cats{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.cat{background:var(--surface);border:1px solid var(--line);text-align:center;display:flex;flex-direction:column}
+.cat .art{aspect-ratio:3/4;overflow:hidden}
+.cat .art svg{width:100%;height:100%;transition:transform .5s}
+.cat:hover .art svg{transform:scale(1.04)}
+.cat h3{font-size:19px;margin:14px 8px 4px}
+.cat span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;text-decoration:underline;text-underline-offset:4px}
+
+/* Shop */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:26px}
+.chip{border:1px solid var(--line);background:var(--surface);padding:8px 16px;font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.toolbar .spacer{flex:1}
+.toolbar select{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);padding:8px 12px}
+.count{color:var(--muted);font-size:13px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px 18px}
+.card{display:flex;flex-direction:column;gap:10px}
+.card .img{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--surface);border:1px solid var(--line)}
+.card .img svg{width:100%;height:100%;transition:transform .5s}
+.card:hover .img svg{transform:scale(1.03)}
+.tag{position:absolute;top:10px;left:10px;background:var(--surface);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:4px 8px}
+.tag.sale{background:var(--rose);color:#fff}
+.wish{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center}
+.wish svg{width:17px;height:17px;stroke:var(--ink);fill:none;stroke-width:1.5}
+.wish[aria-pressed="true"] svg{fill:var(--rose);stroke:var(--rose)}
+.quick{position:absolute;left:10px;right:10px;bottom:10px;background:var(--ink);color:#fff;padding:11px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:.25s}
+.card:hover .quick,.quick:focus-visible{opacity:1;transform:none}
+.card .name{font-size:14.5px;line-height:1.35}
+.card .price{font-size:14px;font-variant-numeric:tabular-nums}
+.card .price s{color:var(--muted);margin-left:8px;font-size:13px}
+.card .swatches{display:flex;gap:6px}
+.card .swatches i{width:12px;height:12px;border-radius:50%;border:1px solid var(--line)}
+.empty{grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted)}
+
+/* Lookbook */
+.look{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:14px}
+.look figure{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line)}
+.look figure:first-child{grid-row:span 2}
+.look figure svg{width:100%;height:100%}
+.look figcaption{position:absolute;left:16px;bottom:14px;background:var(--surface);padding:6px 12px;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.look figure:not(:first-child){aspect-ratio:1/1}
+
+/* About strip */
+.about{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:72px}
+.about div{padding:36px 28px;text-align:center;border-right:1px solid var(--line)}
+.about div:last-child{border-right:0}
+.about h3{font-size:20px;margin-bottom:6px}
+.about p{color:var(--muted);font-size:14px;max-width:34ch;margin:0 auto}
+
+/* Footer */
+footer{background:var(--ink);color:#d8d6d2;margin-top:80px;padding:60px 0 100px}
+.foot{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.4fr;gap:40px}
+footer h4{font-family:var(--body);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#fff;margin-bottom:18px;font-weight:500}
+footer li{list-style:none;margin-bottom:9px;font-size:14px}
+footer li button:hover,footer a:hover{color:#fff;text-decoration:underline}
+footer address{font-style:normal;font-size:14px;line-height:1.8}
+.news{display:flex;border:1px solid #4a4b50;margin-top:6px}
+.news input{flex:1;min-width:0;background:transparent;border:0;color:#fff;padding:12px 14px;font:inherit;font-size:14px}
+.news input::placeholder{color:#8f8d89}
+.news button{padding:0 18px;background:#fff;color:var(--ink);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.news-msg{font-size:13px;margin-top:8px;color:#b9c0ea;min-height:20px}
+.copy{border-top:1px solid #34353a;margin-top:44px;padding-top:22px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:#8f8d89}
+
+/* Drawer + overlays */
+.scrim{position:fixed;inset:0;background:rgba(10,10,12,.45);opacity:0;visibility:hidden;transition:.25s;z-index:80}
+.scrim.on{opacity:1;visibility:visible}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:var(--surface);z-index:90;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--line)}
+.drawer-body{flex:1;overflow:auto;padding:8px 24px}
+.drawer-foot{border-top:1px solid var(--line);padding:20px 24px;display:flex;flex-direction:column;gap:10px}
+.line-item{display:grid;grid-template-columns:72px 1fr auto;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);align-items:start}
+.line-item .thumb{aspect-ratio:3/4;border:1px solid var(--line);overflow:hidden}
+.line-item .thumb svg{width:100%;height:100%}
+.line-item .t{font-size:14px;line-height:1.35}
+.line-item .s{font-size:12.5px;color:var(--muted)}
+.qty{display:inline-flex;border:1px solid var(--line);margin-top:8px}
+.qty button{width:28px;height:28px}
+.qty span{min-width:28px;display:grid;place-items:center;font-size:13px}
+.rm{font-size:11.5px;color:var(--muted);text-decoration:underline;margin-top:6px}
+.sub{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.note{font-size:12.5px;color:var(--muted)}
+.x{width:32px;height:32px;display:grid;place-items:center}
+.x svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.5}
+
+.modal{position:fixed;inset:0;display:grid;place-items:center;z-index:100;padding:16px;visibility:hidden;opacity:0;transition:.2s}
+.modal.on{visibility:visible;opacity:1}
+.modal .box{background:var(--surface);width:min(920px,100%);max-height:92vh;overflow:auto;position:relative}
+.modal .x{position:absolute;top:12px;right:12px;z-index:2;background:var(--surface)}
+.pd{display:grid;grid-template-columns:1fr 1fr}
+.pd .art{aspect-ratio:3/4;border-right:1px solid var(--line)}
+.pd .art svg{width:100%;height:100%}
+.pd .info{padding:40px 34px;display:flex;flex-direction:column;gap:16px}
+.pd h2{font-size:30px}
+.pd .price{font-size:18px;font-variant-numeric:tabular-nums}
+.pd .desc{color:var(--muted);font-size:14.5px}
+.sizes{display:flex;gap:8px;flex-wrap:wrap}
+.sizes button{min-width:46px;height:40px;border:1px solid var(--line);font-size:13px}
+.sizes button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+.pd dl{font-size:13.5px;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;border-top:1px solid var(--line);padding-top:14px}
+.pd dt{color:var(--muted)}
+.err{color:var(--rose);font-size:13px;min-height:18px}
+
+.text-box{padding:44px 40px;max-width:720px}
+.text-box h2{font-size:28px;margin-bottom:16px}
+.text-box p,.text-box li{color:var(--muted);font-size:14.5px;margin-bottom:10px}
+.text-box ul{padding-left:18px}
+
+.form{display:grid;gap:12px;margin-top:8px}
+.form label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.form input,.form textarea{width:100%;font:inherit;border:1px solid var(--line);padding:11px 12px;background:var(--bg)}
+.summary{background:var(--bg);border:1px solid var(--line);padding:14px 16px;font-size:14px;font-variant-numeric:tabular-nums}
+.summary div{display:flex;justify-content:space-between;gap:12px}
+
+.search-box{padding:40px 32px 28px}
+.search-box input{width:100%;font:inherit;font-size:22px;font-family:var(--display);border:0;border-bottom:1px solid var(--ink);padding:10px 0;background:transparent}
+.results{margin-top:18px;display:grid;gap:4px}
+.results button{display:flex;justify-content:space-between;width:100%;text-align:left;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+
+.toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 20px;font-size:13px;opacity:0;transition:.25s;z-index:120;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* Mobile bar */
+.mbar{display:none}
+
+/* Admin */
+#adminView{display:none;min-height:100vh}
+body.admin-mode > .announce, body.admin-mode > header.site, body.admin-mode > main, body.admin-mode > footer, body.admin-mode > .mbar{display:none}
+body.admin-mode #adminView{display:block}
+body.admin-mode{padding-bottom:0}
+.adm-bar{background:var(--ink);color:#fff;padding:14px 0}
+.adm-bar .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.adm-bar .logo{font-size:22px;text-align:left}
+.adm-bar .actions{display:flex;gap:8px;flex-wrap:wrap}
+.adm-bar .btn{background:transparent;color:#fff;border-color:#55565c;padding:9px 16px}
+.adm-bar .btn:hover{background:#fff;color:var(--ink)}
+.adm-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:24px;padding:28px 0 60px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);padding:24px}
+.panel h2{font-size:24px;margin-bottom:14px}
+.panel + .panel{margin-top:24px}
+.adm-form{display:grid;gap:14px}
+.adm-form .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.adm-form label{display:block;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.adm-form input,.adm-form select,.adm-form textarea{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);padding:10px 12px;background:var(--bg)}
+.drop-img{border:1.5px dashed var(--line);background:var(--bg);display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:center;padding:12px}
+.drop-img .pv{aspect-ratio:3/4;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;font-size:11px;color:var(--muted);text-align:center}
+.drop-img .pv img{width:100%;height:100%;object-fit:cover}
+.status{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 16px;font-size:14px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px}
+.status.ok{border-color:#3d7a4f;background:#e7f1ea}
+.status.warn{border-color:var(--rose);background:#f7e8eb}
+.plist{display:grid;gap:0}
+.prow{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.prow .th{aspect-ratio:3/4;border:1px solid var(--line);overflow:hidden}
+.prow .th svg,.prow .th img{width:100%;height:100%}
+.prow .meta{font-size:12.5px;color:var(--muted)}
+.prow .nm{font-size:14.5px;line-height:1.3}
+.prow .acts{display:flex;gap:6px}
+.sm{border:1px solid var(--line);padding:6px 12px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--surface)}
+.sm:hover{border-color:var(--ink)}
+.sm.danger{color:var(--rose);border-color:#e6c3ca}
+.sm.danger.confirm{background:var(--rose);color:#fff;border-color:var(--rose)}
+.login{max-width:400px;margin:10vh auto;padding:0 16px}
+.login .panel{padding:34px}
+.login .logo{margin-bottom:24px}
+.adm-msg{font-size:13px;min-height:18px}
+.adm-msg.e{color:var(--rose)}
+.adm-msg.s{color:#3d7a4f}
+@media (max-width:900px){.adm-wrap{grid-template-columns:1fr}.adm-form .row{grid-template-columns:1fr}}
+
+@media (max-width:1100px){
+  .cats{grid-template-columns:repeat(3,1fr)}
+  .grid{grid-template-columns:repeat(3,1fr)}
+  .foot{grid-template-columns:1fr 1fr}
+}
+@media (max-width:780px){
+  .wrap{padding:0 16px}
+  nav.main{display:none}
+  nav.main.open{display:flex;flex-direction:column;gap:0;padding:0 0 12px}
+  nav.main.open .drop{position:static;transform:none;opacity:1;visibility:visible;border:0;padding:0 0 6px;background:transparent}
+  nav.main.open .top{padding:10px 0}
+  .menu-toggle{display:flex}
+  .head-left .hide-m{display:none}
+  .logo{font-size:26px}
+  .icons .hide-m{display:none}
+  .hero{grid-template-columns:1fr}
+  .hero-copy{padding:32px 22px}
+  .grid{grid-template-columns:repeat(2,1fr);gap:24px 12px}
+  .quick{opacity:1;transform:none;padding:9px;font-size:10px}
+  .look{grid-template-columns:1fr 1fr}
+  .look figure:first-child{grid-column:span 2;grid-row:auto;aspect-ratio:4/3}
+  .about{grid-template-columns:1fr}
+  .about div{border-right:0;border-bottom:1px solid var(--line)}
+  .pd{grid-template-columns:1fr}
+  .pd .art{border-right:0;border-bottom:1px solid var(--line);aspect-ratio:1/1}
+  .pd .info{padding:24px 20px}
+  .foot{grid-template-columns:1fr}
+  .mbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:70;padding-bottom:env(safe-area-inset-bottom)}
+  .mbar button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 0 8px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;position:relative}
+  .mbar svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.4}
+  .mbar .badge{top:4px;right:calc(50% - 20px)}
+  body{padding-bottom:62px}
+}
+@media (max-width:420px){
+  .cats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<div class="announce">Free shipping across India on orders above Rs. 4,999 · Made to order in 10–14 days</div>
+
+<header class="site">
+  <div class="wrap">
+    <div class="head-row">
+      <div class="head-left">
+        <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+        </button>
+        <span class="hide-m">+91 98XXX XXXXX</span>
+      </div>
+      <a href="#top" class="logo" id="top">SAANJH<small>Studio · New Delhi</small></a>
+      <div class="icons">
+        <button class="icon-btn" data-open="search" aria-label="Search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        </button>
+        <button class="icon-btn hide-m" data-open="account" aria-label="Account">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+        </button>
+        <button class="icon-btn" id="wishBtn" aria-label="Wishlist">
+          <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+          <span class="badge" id="wishCount">0</span>
+        </button>
+        <button class="icon-btn" data-open="cart" aria-label="Cart">
+          <svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+          <span class="badge" id="cartCount">0</span>
+        </button>
+      </div>
+    </div>
+    <nav class="main caps" id="mainNav" aria-label="Main">
+      <div><button class="top" data-filter="all">Shop All</button></div>
+      <div>
+        <button class="top" aria-haspopup="true">Categories <svg viewBox="0 0 10 10"><path d="M1 3l4 4 4-4"/></svg></button>
+        <div class="drop" id="dropCats"></div>
+      </div>
+      <div>
+        <button class="top" aria-haspopup="true">Collections <svg viewBox="0 0 10 10"><path d="M1 3l4 4 4-4"/></svg></button>
+        <div class="drop" id="dropCols"></div>
+      </div>
+      <div><a class="top" href="#lookbook">Lookbook</a></div>
+      <div><button class="top" data-page="about">Our Story</button></div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero">
+      <div class="hero-art" id="heroArt"></div>
+      <div class="hero-copy">
+        <span class="caps">New · Winter Festive 2026</span>
+        <h1>Hand block prints, <em>cut slow</em> for the evening hour</h1>
+        <p>Every piece starts as a drawing in our studio, is printed by hand on cotton and mul, and is stitched to order in New Delhi.</p>
+        <div class="hero-actions">
+          <button class="btn" data-collection="Winter Festive 2026">Shop the collection</button>
+          <a class="btn ghost" href="#lookbook">View lookbook</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="wrap" aria-labelledby="catHead">
+    <div class="sec-head"><h2 id="catHead">Shop by category</h2></div>
+    <div class="cats" id="cats"></div>
+  </section>
+
+  <section class="wrap" id="shop" aria-labelledby="shopHead">
+    <div class="sec-head">
+      <h2 id="shopHead">Shop All</h2>
+    </div>
+    <div class="toolbar" id="toolbar">
+      <div id="chips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      <span class="spacer"></span>
+      <label for="sort" class="caps" style="color:var(--muted)">Sort</label>
+      <select id="sort">
+        <option value="feat">Featured</option>
+        <option value="low">Price: low to high</option>
+        <option value="high">Price: high to low</option>
+        <option value="new">Newest</option>
+      </select>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="wrap" id="lookbook" aria-labelledby="lookHead">
+    <div class="sec-head">
+      <h2 id="lookHead">Lookbook · Winter Festive 2026</h2>
+      <button class="caps link" data-collection="Winter Festive 2026">Shop the looks</button>
+    </div>
+    <div class="look" id="look"></div>
+  </section>
+
+  <div class="wrap">
+    <div class="about">
+      <div><h3>Hand block printed</h3><p>Prints carved in wood and stamped by artisans in Bagru and Sanganer.</p></div>
+      <div><h3>Made to order</h3><p>Stitched in our New Delhi studio in 10–14 days, so nothing goes to waste.</p></div>
+      <div><h3>Easy exchanges</h3><p>Size exchange within 7 days of delivery on all non-sale pieces.</p></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <h4>Get in touch</h4>
+        <address>
+          Saanjh Studio<br>
+          Your street address, New Delhi 1100XX<br>
+          hello@yourbrand.in<br>
+          +91 98XXX XXXXX<br>
+          <a href="https://instagram.com/" rel="noopener">Instagram @yourbrand</a>
+        </address>
+      </div>
+      <div>
+        <h4>Categories</h4>
+        <ul id="footCats"></ul>
+      </div>
+      <div>
+        <h4>Information</h4>
+        <ul>
+          <li><button data-page="privacy">Privacy Policy</button></li>
+          <li><button data-page="terms">Terms &amp; Conditions</button></li>
+          <li><button data-page="refund">Refund Policy</button></li>
+          <li><button data-page="shipping">Shipping &amp; Return Policy</button></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Newsletter signup</h4>
+        <p style="font-size:14px;margin-bottom:10px">New drops, restocks and studio sales, once a month.</p>
+        <form class="news" id="newsForm">
+          <input type="email" id="newsEmail" placeholder="Your email" required aria-label="Email address">
+          <button type="submit">Subscribe</button>
+        </form>
+        <p class="news-msg" id="newsMsg" aria-live="polite"></p>
+      </div>
+    </div>
+    <div class="copy">
+      <span>© 2026 Saanjh Studio. All rights reserved.</span>
+      <span>Prices in Indian rupees, inclusive of GST. · <a href="#admin">Admin login</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- Mobile bottom bar -->
+<div class="mbar">
+  <button data-filter="all"><svg viewBox="0 0 24 24"><path d="M4 9l2-5h12l2 5M4 9v11h16V9M4 9h16"/></svg>Shop</button>
+  <button id="mFilter"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filter</button>
+  <button data-open="cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Cart<span class="badge" id="cartCountM">0</span></button>
+  <button data-open="account"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Account</button>
+  <button data-open="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="cart" aria-label="Cart">
+  <div class="drawer-head">
+    <span class="caps">Your cart</span>
+    <button class="x" data-close aria-label="Close cart"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="drawer-body" id="cartBody"></div>
+  <div class="drawer-foot" id="cartFoot">
+    <div class="sub"><span>Subtotal</span><strong id="subtotal">Rs. 0.00</strong></div>
+    <p class="note">Taxes included. Shipping calculated at checkout.</p>
+    <button class="btn full" id="checkoutBtn">Check out</button>
+  </div>
+</aside>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="box" id="modalBox"></div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<div id="adminView"></div>
+
+<script>
+/* ---------- Supabase connection ---------- */
+const SUPABASE_URL = "https://unyncyejykidktrefoza.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVueW5jeWVqeWtpZGt0cmVmb3phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyOTk0ODAsImV4cCI6MjEwOTg3NTQ4MH0.oD2eJi6obX2GChyIfxJcO3tOwnyQCfloRoN80gX1jr8";   // public key, safe to keep in the page
+const ADMIN_EMAIL = "inaademx@gmail.com";
+const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+let LOADING = !!sb, DB_ERROR = false;
+
+/* ---------- Store settings: defaults until the database loads ---------- */
+let STORE = {
+  name: "Saanjh Studio",
+  whatsapp: "919999999999",
+  freeShipAbove: 4999,
+  shipping: 150
+};
+
+const CATS = ["Dresses","Shirts","Sets","Jackets","Shirt Dress","Tops and Bottoms"];
+const COLS = ["Winter Festive 2026","Pre-Spring 2026","Spring/Summer 2026"];
+const CAT_SHAPE = {"Dresses":"dress","Shirts":"shirt","Sets":"set","Jackets":"jacket","Shirt Dress":"shirtdress","Tops and Bottoms":"topskirt"};
+
+const SAMPLE_PRODUCTS = [
+  {id:1,name:"Mehtab Indigo Buti Maxi Dress",cat:"Dresses",col:"Winter Festive 2026",price:8900,bg:"#e8eaf3",c1:"#2d3b8a",c2:"#f3efe6",pat:"buti",tag:"New",fabric:"Cotton mul",new:12},
+  {id:2,name:"Gulnar Rose Tiered Dress",cat:"Dresses",col:"Spring/Summer 2026",price:7600,mrp:9500,bg:"#f4e6e8",c1:"#b85a6b",c2:"#fbf1ee",pat:"dots",tag:"Sale",fabric:"Cotton voile",new:4},
+  {id:3,name:"Neel Stripe Oversized Shirt",cat:"Shirts",col:"Pre-Spring 2026",price:4200,bg:"#eef0f4",c1:"#f7f6f2",c2:"#2d3b8a",pat:"stripe",fabric:"Cotton poplin",new:9},
+  {id:4,name:"Chandni Ivory Block Print Shirt",cat:"Shirts",col:"Winter Festive 2026",price:4600,bg:"#efece6",c1:"#f6f1e4",c2:"#9a6a2f",pat:"buti",tag:"New",fabric:"Handloom cotton",new:11},
+  {id:5,name:"Raat Rani Co-ord Set",cat:"Sets",col:"Winter Festive 2026",price:9800,bg:"#e4e5ec",c1:"#1f2440",c2:"#d8b56a",pat:"buti",tag:"New",fabric:"Cotton silk",new:10},
+  {id:6,name:"Pista Check Lounge Set",cat:"Sets",col:"Spring/Summer 2026",price:6400,bg:"#e9efe6",c1:"#a9c19a",c2:"#f5f4ee",pat:"check",fabric:"Cotton flex",new:3},
+  {id:7,name:"Quilted Kantha Jacket",cat:"Jackets",col:"Winter Festive 2026",price:12500,bg:"#f0e9e4",c1:"#7b2f3a",c2:"#e9c9a8",pat:"stripe",tag:"Bestseller",fabric:"Quilted cotton",new:8},
+  {id:8,name:"Sahil Denim Overshirt Jacket",cat:"Jackets",col:"Pre-Spring 2026",price:7900,bg:"#e6e9ef",c1:"#3f557a",c2:"#a9b8d0",pat:"plain",fabric:"Cotton denim",new:6},
+  {id:9,name:"Dhoop Mustard Shirt Dress",cat:"Shirt Dress",col:"Spring/Summer 2026",price:6900,bg:"#f4eedc",c1:"#d4a23a",c2:"#fbf6ea",pat:"dots",fabric:"Cotton cambric",new:2},
+  {id:10,name:"Saanjh Belted Shirt Dress",cat:"Shirt Dress",col:"Winter Festive 2026",price:7400,bg:"#ece7ef",c1:"#5b4a7a",c2:"#efe6f3",pat:"buti",tag:"New",fabric:"Cotton mul",new:13},
+  {id:11,name:"Phool Wrap Top & Skirt",cat:"Tops and Bottoms",col:"Spring/Summer 2026",price:5800,mrp:7200,bg:"#f3e9e4",c1:"#c9775b",c2:"#fbefe8",pat:"buti",tag:"Sale",fabric:"Cotton voile",new:1},
+  {id:12,name:"Kohl Black Tunic & Pant",cat:"Tops and Bottoms",col:"Pre-Spring 2026",price:6200,bg:"#e7e7e7",c1:"#24252a",c2:"#d9d6cf",pat:"stripe",fabric:"Linen blend",new:7}
+];
+const SIZES = ["XS","S","M","L","XL","XXL"];
+
+let PRODUCTS = sb ? [] : SAMPLE_PRODUCTS;   // sample designs only show before the database is connected
+const rowToProduct = r=>({id:r.id,name:r.name,cat:r.category,col:r.collection,price:r.price,mrp:r.mrp||undefined,
+  fabric:r.fabric||"",tag:r.tag||undefined,desc:r.description||"",img:r.image_url||null,imgPath:r.image_path||null,new:r.id,bg:"#ffffff"});
+async function loadFromDb(){
+  const [p,s]=await Promise.all([
+    sb.from("products").select("*").order("created_at",{ascending:true}),
+    sb.from("settings").select("*").eq("id",1).maybeSingle()
+  ]);
+  if(p.error) throw p.error;
+  PRODUCTS = p.data.map(rowToProduct);
+  if(s.data) Object.assign(STORE,{whatsapp:s.data.whatsapp,freeShipAbove:s.data.free_ship_above,shipping:s.data.shipping});
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+/* ---------- Garment illustration (inline SVG, no photos needed) ---------- */
+let uid = 0;
+const SHAPES = {
+  dress:'M82 34 Q100 50 118 34 L138 42 L131 84 L127 100 Q148 170 166 236 Q100 252 34 236 Q52 170 73 100 L69 84 L62 42 Z',
+  shirt:'M80 32 Q100 46 120 32 L160 50 L180 118 L158 126 L146 92 L148 222 L52 222 L54 92 L42 126 L20 118 L40 50 Z',
+  jacket:'M78 30 L100 70 L122 30 L162 48 L182 196 L160 200 L148 96 L150 232 L50 232 L52 96 L40 200 L18 196 L38 48 Z',
+  shirtdress:'M80 32 Q100 46 120 32 L158 50 L176 116 L156 122 L145 92 Q150 170 160 240 L40 240 Q50 170 55 92 L44 122 L24 116 L42 50 Z',
+  settop:'M76 30 Q100 44 124 30 L156 46 L166 88 L148 92 L142 72 L143 124 L57 124 L58 72 L52 92 L34 88 L44 46 Z',
+  setbottom:'M60 132 L140 132 L148 244 L112 244 L100 166 L88 244 L52 244 Z',
+  skirt:'M62 132 L138 132 L160 244 L40 244 Z'
+};
+function patternDef(id,p){
+  const {pat,c1,c2} = p;
+  if(pat==="dots") return `<pattern id="${id}" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="${c1}"/><circle cx="7" cy="7" r="2" fill="${c2}"/></pattern>`;
+  if(pat==="stripe") return `<pattern id="${id}" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="${c1}"/><rect width="3" height="10" fill="${c2}"/></pattern>`;
+  if(pat==="check") return `<pattern id="${id}" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="${c2}"/><rect width="16" height="5" fill="${c1}" opacity=".7"/><rect width="5" height="16" fill="${c1}" opacity=".7"/></pattern>`;
+  if(pat==="buti") return `<pattern id="${id}" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="${c1}"/><g fill="${c2}"><circle cx="11" cy="7" r="2.2"/><circle cx="7" cy="11" r="2.2"/><circle cx="15" cy="11" r="2.2"/><circle cx="11" cy="15" r="2.2"/></g><circle cx="11" cy="11" r="1.4" fill="${c1}"/><circle cx="0" cy="0" r="1.2" fill="${c2}"/><circle cx="22" cy="22" r="1.2" fill="${c2}"/></pattern>`;
+  return `<pattern id="${id}" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="${c1}"/><path d="M0 10L10 0" stroke="${c2}" stroke-width=".6" opacity=".5"/></pattern>`;
+}
+function garment(p, opts={}){
+  if(p.img) return `<img src="${p.img}" alt="${esc(opts.label||p.name)}" style="width:100%;height:100%;object-fit:cover">`;
+  const id = "pt"+(++uid);
+  const shape = CAT_SHAPE[p.cat] || "dress";
+  let body;
+  const st = `stroke="rgba(0,0,0,.18)" stroke-width="1"`;
+  if(shape==="set") body = `<path d="${SHAPES.settop}" fill="url(#${id})" ${st}/><path d="${SHAPES.setbottom}" fill="url(#${id})" ${st}/>`;
+  else if(shape==="topskirt") body = `<path d="${SHAPES.settop}" fill="${p.c2}" ${st}/><path d="${SHAPES.skirt}" fill="url(#${id})" ${st}/>`;
+  else body = `<path d="${SHAPES[shape]}" fill="url(#${id})" ${st}/>`;
+  const extra = shape==="jacket" ? `<path d="M100 70 L100 232" stroke="rgba(0,0,0,.25)"/>` :
+                (shape==="shirt"||shape==="shirtdress") ? `<g fill="rgba(0,0,0,.28)"><circle cx="100" cy="70" r="2"/><circle cx="100" cy="100" r="2"/><circle cx="100" cy="130" r="2"/><circle cx="100" cy="160" r="2"/></g>` : "";
+  const belt = p.id===10 ? `<rect x="54" y="128" width="92" height="7" fill="${p.c1}" opacity=".85"/>` : "";
+  return `<svg viewBox="-20 0 240 280" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(opts.label||p.name)}">
+    <defs>${patternDef(id,p)}</defs>
+    <rect x="-20" y="0" width="240" height="280" fill="${opts.bg||p.bg}"/>
+    <ellipse cx="100" cy="258" rx="70" ry="6" fill="rgba(0,0,0,.06)"/>
+    <path d="M100 12 L100 30" stroke="rgba(0,0,0,.3)" stroke-width="1"/><path d="M84 30 Q100 18 116 30" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1.4"/>
+    ${body}${extra}${belt}
+  </svg>`;
+}
+function heroArt(){
+  const id="hero"+(++uid);
+  return `<svg viewBox="0 0 500 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs><pattern id="${id}" width="46" height="46" patternUnits="userSpaceOnUse">
+      <g fill="#f3efe6" opacity=".9"><circle cx="23" cy="13" r="5"/><circle cx="13" cy="23" r="5"/><circle cx="33" cy="23" r="5"/><circle cx="23" cy="33" r="5"/></g>
+      <circle cx="23" cy="23" r="3" fill="#2d3b8a"/><circle cx="0" cy="0" r="2.4" fill="#d8b56a"/><circle cx="46" cy="46" r="2.4" fill="#d8b56a"/><circle cx="46" cy="0" r="2.4" fill="#d8b56a"/><circle cx="0" cy="46" r="2.4" fill="#d8b56a"/>
+    </pattern></defs>
+    <rect width="500" height="400" fill="url(#${id})"/>
+    <rect x="150" y="40" width="200" height="320" fill="#2d3b8a" opacity=".88"/>
+    <g transform="translate(160 55) scale(.9)">
+      <path d="${SHAPES.dress}" fill="#f3efe6"/>
+      <path d="M100 12 L100 30" stroke="#f3efe6"/><path d="M84 30 Q100 18 116 30" fill="none" stroke="#f3efe6" stroke-width="1.6"/>
+    </g>
+    <text x="250" y="378" text-anchor="middle" fill="#f3efe6" font-family="Jost, sans-serif" font-size="11" letter-spacing="4">MEHTAB · INDIGO BUTI</text>
+  </svg>`;
+}
+
+/* ---------- State ---------- */
+const store = {
+  get(k,d){try{const v=localStorage.getItem("saanjh_"+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("saanjh_"+k,JSON.stringify(v))}catch(e){}}
+};
+let cart = store.get("cart",[]);       // [{id,size,qty}]
+let wish = store.get("wish",[]);       // [id]
+let filter = {type:"all",value:null};
+const $ = s=>document.querySelector(s);
+const rs = n=>"Rs. "+n.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const byId = id=>PRODUCTS.find(p=>p.id===id);
+
+/* ---------- Render ---------- */
+function renderNav(){
+  $("#dropCats").innerHTML = CATS.map(c=>`<button data-cat="${c}">${c}</button>`).join("");
+  $("#dropCols").innerHTML = COLS.map(c=>`<button data-collection="${c}">${c}</button>`).join("");
+  $("#footCats").innerHTML = CATS.map(c=>`<li><button data-cat="${c}">${c}</button></li>`).join("");
+  $("#cats").innerHTML = CATS.map(c=>{
+    const p = PRODUCTS.find(x=>x.cat===c) || {cat:c,name:c,bg:"#ecebe7",c1:"#c9c6bf",c2:"#ecebe7",pat:"plain"};
+    return `<button class="cat" data-cat="${c}"><div class="art">${garment(p,{label:c})}</div><h3>${c}</h3><span>Shop Now</span></button>`;
+  }).join("");
+  $("#chips").innerHTML = [`<button class="chip" data-chip="all">All</button>`].concat(CATS.map(c=>`<button class="chip" data-chip="${c}">${c}</button>`)).join("");
+  $("#heroArt").innerHTML = heroArt();
+  const lookPicks = PRODUCTS.filter(p=>p.col===COLS[0]).concat(PRODUCTS.filter(p=>p.col!==COLS[0])).slice(0,5);
+  $("#look").innerHTML = lookPicks.map((p,i)=>`<figure><button data-product="${p.id}" style="display:block;width:100%;height:100%" aria-label="View ${esc(p.name)}">${garment(p,{bg:i===0?"#dfe2ee":p.bg})}</button><figcaption>Look ${String(i+1).padStart(2,"0")}</figcaption></figure>`).join("");
+}
+function currentList(){
+  let list = PRODUCTS.slice();
+  if(filter.type==="cat") list = list.filter(p=>p.cat===filter.value);
+  if(filter.type==="col") list = list.filter(p=>p.col===filter.value);
+  if(filter.type==="wish") list = list.filter(p=>wish.includes(p.id));
+  const s = $("#sort").value;
+  if(s==="low") list.sort((a,b)=>a.price-b.price);
+  if(s==="high") list.sort((a,b)=>b.price-a.price);
+  if(s==="new") list.sort((a,b)=>b.new-a.new);
+  return list;
+}
+function renderGrid(){
+  const list = currentList();
+  const title = filter.type==="all"?"Shop All":filter.type==="wish"?"Your wishlist":filter.value;
+  $("#shopHead").textContent = title;
+  $("#count").textContent = list.length + (list.length===1?" product":" products");
+  document.querySelectorAll(".chip").forEach(c=>{
+    const v=c.dataset.chip;
+    c.setAttribute("aria-pressed", (filter.type==="all"&&v==="all")||(filter.type==="cat"&&v===filter.value) ? "true":"false");
+  });
+  $("#grid").innerHTML = list.length ? list.map(p=>`
+    <article class="card">
+      <div class="img">
+        <button data-product="${p.id}" style="display:block;width:100%;height:100%" aria-label="View ${esc(p.name)}">${garment(p)}</button>
+        ${p.tag?`<span class="tag ${p.tag==="Sale"?"sale":""}">${esc(p.tag)}</span>`:""}
+        <button class="wish" data-wish="${p.id}" aria-pressed="${wish.includes(p.id)}" aria-label="Add ${esc(p.name)} to wishlist"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+        <button class="quick" data-product="${p.id}">Quick view</button>
+      </div>
+      <button data-product="${p.id}" class="name" style="text-align:left">${esc(p.name)}</button>
+      <div class="price">${rs(p.price)}${p.mrp?`<s>${rs(p.mrp)}</s>`:""}</div>
+      ${p.c1?`<div class="swatches"><i style="background:${esc(p.c1)}"></i>${p.c2?`<i style="background:${esc(p.c2)}"></i>`:""}</div>`:""}
+    </article>`).join("") : `<p class="empty">${LOADING?"Loading designs…":DB_ERROR?"Designs couldn't load. Check your internet connection and refresh the page.":filter.type==="wish"?"Your wishlist is empty. Tap the heart on any piece to save it here.":PRODUCTS.length?"No designs in this section yet.":"New designs are coming soon."}</p>`;
+}
+function renderCounts(){
+  const n = cart.reduce((a,b)=>a+b.qty,0);
+  $("#cartCount").textContent = n; $("#cartCountM").textContent = n;
+  $("#wishCount").textContent = wish.length;
+}
+function subtotal(){return cart.reduce((a,l)=>{const p=byId(l.id);return a+(p?p.price*l.qty:0)},0)}
+function renderCart(){
+  if(!cart.length){
+    $("#cartBody").innerHTML = `<div style="text-align:center;padding:60px 0"><p style="font-family:var(--display);font-size:22px;margin-bottom:16px">Your cart is empty</p><button class="btn" data-close data-filter="all">Continue shopping</button></div>`;
+    $("#cartFoot").style.display="none";
+  } else {
+    $("#cartFoot").style.display="flex";
+    $("#cartBody").innerHTML = cart.map((l,i)=>{const p=byId(l.id);if(!p)return "";return `
+      <div class="line-item">
+        <div class="thumb">${garment(p)}</div>
+        <div>
+          <div class="t">${esc(p.name)}</div>
+          <div class="s">Size ${l.size}</div>
+          <div class="qty"><button data-dec="${i}" aria-label="Decrease quantity">−</button><span>${l.qty}</span><button data-inc="${i}" aria-label="Increase quantity">+</button></div><br>
+          <button class="rm" data-rm="${i}">Remove</button>
+        </div>
+        <div style="font-size:14px;font-variant-numeric:tabular-nums">${rs(p.price*l.qty)}</div>
+      </div>`}).join("");
+    const st=subtotal(), left=STORE.freeShipAbove-st;
+    $("#subtotal").textContent = rs(st);
+    $(".drawer-foot .note").textContent = left>0 ? `Add ${rs(left)} more for free shipping. Taxes included.` : "You get free shipping. Taxes included.";
+  }
+  renderCounts();
+  store.set("cart",cart);
+}
+
+/* ---------- Overlays ---------- */
+function openScrim(){$("#scrim").classList.add("on")}
+function closeAll(){
+  $("#scrim").classList.remove("on");$("#cart").classList.remove("on");$("#modal").classList.remove("on");
+}
+function openCart(){renderCart();openScrim();$("#cart").classList.add("on");setTimeout(()=>$("#cart .x").focus(),50)}
+function openModal(html){
+  $("#modalBox").innerHTML = `<button class="x" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`+html;
+  $("#cart").classList.remove("on");openScrim();$("#modal").classList.add("on");
+}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),2200)}
+
+function openProduct(id){
+  const p=byId(id);
+  openModal(`<div class="pd">
+    <div class="art">${garment(p)}</div>
+    <div class="info">
+      <span class="caps" style="color:var(--muted)">${esc(p.col)}</span>
+      <h2>${esc(p.name)}</h2>
+      <div class="price">${rs(p.price)}${p.mrp?` <s style="color:var(--muted);font-size:15px">${rs(p.mrp)}</s>`:""}</div>
+      <p class="desc">${p.desc?esc(p.desc):`Designed in our studio and hand block printed on ${esc((p.fabric||"cotton").toLowerCase())}. Relaxed fit, true to size. Each piece is stitched to order, so slight variations in print are part of the handwork.`}</p>
+      <div><div class="caps" style="margin-bottom:8px">Size</div>
+        <div class="sizes" id="sizes">${SIZES.map(s=>`<button data-size="${s}" aria-pressed="false">${s}</button>`).join("")}</div>
+      </div>
+      <p class="err" id="sizeErr" aria-live="polite"></p>
+      <button class="btn full" data-add="${p.id}">Add to cart</button>
+      <button class="btn ghost full" data-wish="${p.id}" aria-pressed="${wish.includes(p.id)}">${wish.includes(p.id)?"Saved to wishlist":"Add to wishlist"}</button>
+      <dl><dt>Fabric</dt><dd>${esc(p.fabric||"—")}</dd><dt>Category</dt><dd>${esc(p.cat)}</dd><dt>Dispatch</dt><dd>10–14 days, made to order</dd><dt>Care</dt><dd>Gentle hand wash, dry in shade</dd></dl>
+    </div></div>`);
+}
+function openPage(key){
+  const pages={
+    about:["Our Story",`<p>Saanjh means the evening hour, when the light softens and the day slows down. We design clothes for that feeling.</p><p>Every print begins as a drawing in our New Delhi studio. It is carved into wooden blocks and printed by hand by artisan families in Rajasthan, then cut and stitched in small batches.</p><p>Replace this text with your own story: who you are, how you started, and what makes your designs yours.</p>`],
+    privacy:["Privacy Policy",`<p>We collect only the details needed to process your order: name, phone number, email and shipping address.</p><p>We never sell or share your information with third parties except our delivery partners.</p><p>Edit this policy to match your business before going live.</p>`],
+    terms:["Terms & Conditions",`<p>All products are made to order. Colours may vary slightly from what you see on screen because of hand printing and display settings.</p><p>Prices are in Indian rupees and inclusive of GST. We may update prices and products without notice.</p>`],
+    refund:["Refund Policy",`<ul><li>Orders can be cancelled within 24 hours of placing them for a full refund.</li><li>Since every piece is made to order, we offer size exchanges rather than refunds.</li><li>Damaged or wrong items are refunded in full to the original payment method within 7 working days.</li></ul>`],
+    shipping:["Shipping & Return Policy",`<ul><li>Free shipping across India on orders above Rs. 4,999. Below that, a flat Rs. 150 applies.</li><li>Orders dispatch in 10–14 days and arrive within 3–6 days of dispatch.</li><li>Exchange requests must be raised within 7 days of delivery. Items must be unworn with tags attached.</li><li>Sale items are not eligible for exchange.</li></ul>`],
+    account:["Account",`<p>Customer accounts aren't set up on this site yet. To track an order, message us on WhatsApp with your order number.</p>`]
+  };
+  const [t,b]=pages[key];
+  openModal(`<div class="text-box"><h2>${t}</h2>${b}</div>`);
+}
+function openSearch(){
+  openModal(`<div class="search-box"><label for="q" class="caps" style="color:var(--muted)">Search the store</label><input id="q" placeholder="Try: indigo, shirt, jacket" autocomplete="off"><div class="results" id="results"></div></div>`);
+  const q=$("#q"); setTimeout(()=>q.focus(),50);
+  const run=()=>{const v=q.value.trim().toLowerCase();
+    const r=v?PRODUCTS.filter(p=>(p.name+" "+p.cat+" "+p.col+" "+p.fabric).toLowerCase().includes(v)):[];
+    $("#results").innerHTML = v ? (r.length? r.map(p=>`<button data-product="${p.id}"><span>${esc(p.name)}</span><span>${rs(p.price)}</span></button>`).join("") : `<p class="note">No matches for “${esc(q.value)}”.</p>`) : "";
+  };
+  q.addEventListener("input",run);
+}
+function openCheckout(){
+  const st=subtotal(), ship= st>=STORE.freeShipAbove?0:STORE.shipping;
+  openModal(`<div class="text-box" style="max-width:560px">
+    <h2>Checkout</h2>
+    <div class="summary">${cart.map(l=>{const p=byId(l.id);return `<div><span>${esc(p.name)} (${l.size}) × ${l.qty}</span><span>${rs(p.price*l.qty)}</span></div>`}).join("")}
+      <div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px"><span>Shipping</span><span>${ship?rs(ship):"Free"}</span></div>
+      <div><strong>Total</strong><strong>${rs(st+ship)}</strong></div></div>
+    <form class="form" id="coForm">
+      <div><label for="coName">Full name</label><input id="coName" required></div>
+      <div><label for="coPhone">Phone number</label><input id="coPhone" type="tel" required pattern="[0-9+ ]{10,14}"></div>
+      <div><label for="coAddr">Shipping address with PIN code</label><textarea id="coAddr" rows="3" required></textarea></div>
+      <button class="btn full" type="submit">Place order on WhatsApp</button>
+      <p class="note">Your order details open in WhatsApp. We confirm availability and share a payment link (UPI, card or bank transfer).</p>
+    </form><div id="coDone"></div></div>`);
+  $("#coForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const lines = cart.map(l=>{const p=byId(l.id);return `• ${p.name} | Size ${l.size} | Qty ${l.qty} | ${rs(p.price*l.qty)}`}).join("\n");
+    const msg = `New order – ${STORE.name}\n\n${lines}\nShipping: ${ship?rs(ship):"Free"}\nTotal: ${rs(st+ship)}\n\nName: ${$("#coName").value}\nPhone: ${$("#coPhone").value}\nAddress: ${$("#coAddr").value}`;
+    const url = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
+    $("#coForm").style.display="none";
+    $("#coDone").innerHTML = `<p style="color:var(--ink);margin:16px 0 12px">Almost done. Tap below to send your order to us on WhatsApp.</p><a class="btn full" href="${url}" target="_blank" rel="noopener">Open WhatsApp</a><p class="note" style="margin-top:10px">WhatsApp: +${STORE.whatsapp}</p>`;
+  });
+}
+
+/* ---------- Events ---------- */
+function setFilter(type,value){
+  filter={type,value};renderGrid();closeAll();
+  $("#mainNav").classList.remove("open");$("#menuToggle").setAttribute("aria-expanded","false");
+  document.getElementById("shop").scrollIntoView();
+}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button,a"); if(!t) { if(e.target.id==="scrim"||e.target.id==="modal") closeAll(); return; }
+  const d=t.dataset;
+  if(d.close!==undefined && !d.filter){closeAll();return}
+  if(d.filter){setFilter("all");return}
+  if(d.cat){setFilter("cat",d.cat);return}
+  if(d.collection){setFilter("col",d.collection);return}
+  if(d.chip){d.chip==="all"?setFilter("all"):setFilter("cat",d.chip);return}
+  if(d.product){openProduct(+d.product);return}
+  if(d.page){openPage(d.page);return}
+  if(d.open==="cart"){openCart();return}
+  if(d.open==="search"){openSearch();return}
+  if(d.open==="account"){openPage("account");return}
+  if(d.wish){
+    const id=+d.wish; const on=wish.includes(id);
+    wish = on? wish.filter(x=>x!==id) : wish.concat(id);
+    store.set("wish",wish); renderCounts(); renderGrid();
+    document.querySelectorAll(`[data-wish="${id}"]`).forEach(b=>{b.setAttribute("aria-pressed",!on); if(b.classList.contains("btn")) b.textContent=!on?"Saved to wishlist":"Add to wishlist"});
+    toast(on?"Removed from wishlist":"Saved to wishlist");return;
+  }
+  if(d.size){document.querySelectorAll("#sizes button").forEach(b=>b.setAttribute("aria-pressed",b===t));$("#sizeErr").textContent="";return}
+  if(d.add){
+    const sel=document.querySelector('#sizes [aria-pressed="true"]');
+    if(!sel){$("#sizeErr").textContent="Please choose a size first.";return}
+    const id=+d.add,size=sel.dataset.size;
+    const ex=cart.find(l=>l.id===id&&l.size===size);
+    ex?ex.qty++:cart.push({id,size,qty:1});
+    $("#modal").classList.remove("on");openCart();toast("Added to cart");return;
+  }
+  if(d.inc){cart[+d.inc].qty++;renderCart();return}
+  if(d.dec){const l=cart[+d.dec];l.qty>1?l.qty--:cart.splice(+d.dec,1);renderCart();return}
+  if(d.rm){cart.splice(+d.rm,1);renderCart();return}
+  if(t.id==="checkoutBtn"){openCheckout();return}
+  if(t.id==="wishBtn"){setFilter("wish");return}
+  if(t.id==="mFilter"){document.getElementById("toolbar").scrollIntoView();return}
+  if(t.id==="menuToggle"){const n=$("#mainNav");n.classList.toggle("open");t.setAttribute("aria-expanded",n.classList.contains("open"));return}
+});
+$("#scrim").addEventListener("click",closeAll);
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeAll()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeAll()});
+$("#sort").addEventListener("change",renderGrid);
+$("#newsForm").addEventListener("submit",e=>{e.preventDefault();$("#newsMsg").textContent="Thanks for subscribing. Look out for our next drop.";$("#newsEmail").value=""});
+
+/* ---------- Start: load designs from Supabase ---------- */
+renderNav();renderGrid();renderCart();
+async function init(){
+  if(!sb){ LOADING=false; renderGrid(); return; }
+  try{ await loadFromDb(); DB_ERROR=false; }
+  catch(e){ console.error(e); DB_ERROR=true; }
+  LOADING=false;
+  cart = cart.filter(l=>PRODUCTS.some(p=>p.id===l.id));
+  wish = wish.filter(id=>PRODUCTS.some(p=>p.id===id));
+  store.set("cart",cart); store.set("wish",wish);
+  renderNav();renderGrid();renderCart();
+}
+init();
+
+/* =====================================================================
+   ADMIN  (open with  index.html#admin  or the "Admin login" link in the footer)
+   Login is Supabase Auth. Only ADMIN_EMAIL can change designs: the database
+   rules check this too, so nobody else can edit even with the page's code.
+   ===================================================================== */
+const adm = { editing:null, imgBlob:null, imgPreview:null, delArm:null, busy:false, email:null };
+
+function compressImage(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onerror=()=>rej(new Error("read"));
+    r.onload=()=>{const im=new Image();
+      im.onerror=()=>rej(new Error("decode"));
+      im.onload=()=>{const max=1400,sc=Math.min(1,max/Math.max(im.width,im.height));
+        const c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+        const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+        c.toBlob(b=>b?res({blob:b,preview:URL.createObjectURL(b)}):rej(new Error("encode")),"image/jpeg",0.82)};
+      im.src=r.result};
+    r.readAsDataURL(file);
+  });
+}
+function friendlyError(e){
+  const m=(e&&e.message)||String(e);
+  if(/row-level security|violates|permission|not authorized|Unauthorized/i.test(m)) return "This account isn't allowed to change the store. Log in with the admin email.";
+  if(/Failed to fetch|NetworkError|network/i.test(m)) return "Couldn't reach the database. Check your internet connection and try again.";
+  if(/JWT|expired/i.test(m)) return "Your login has expired. Log out and log in again.";
+  return "Something went wrong: "+m;
+}
+function setMsg(id,text,kind){const el=document.getElementById(id);if(!el)return;el.className="adm-msg"+(kind?" "+kind:"");el.textContent=text}
+
+function renderNotConnected(){
+  $("#adminView").innerHTML=`<div class="login"><div class="panel">
+    <div class="logo">SAANJH<small>Admin</small></div>
+    <p class="note">This website isn't connected to its database yet. Add the Supabase project URL and anon key at the top of the script (SUPABASE_URL and SUPABASE_ANON_KEY), then reload.</p>
+    <p style="margin-top:16px"><a href="#top" class="note" style="text-decoration:underline">Back to store</a></p>
+  </div></div>`;
+}
+
+function renderLogin(msg, mode){
+  mode = mode || "login";
+  const signup = mode==="signup";
+  $("#adminView").innerHTML=`<div class="login"><div class="panel">
+    <div class="logo">SAANJH<small>Admin</small></div>
+    <h2 style="font-size:22px;margin-bottom:14px">${signup?"Create your admin password":"Log in"}</h2>
+    <form class="adm-form" id="loginForm">
+      <div><label for="admEmail">Email</label><input id="admEmail" type="email" autocomplete="username" required value="${esc(ADMIN_EMAIL)}"></div>
+      <div><label for="admPass">${signup?"Choose a password (at least 8 characters)":"Password"}</label><input id="admPass" type="password" minlength="${signup?8:1}" autocomplete="${signup?"new-password":"current-password"}" required></div>
+      <p class="adm-msg ${msg&&msg.kind?msg.kind:"e"}" id="loginMsg" aria-live="polite">${msg?esc(msg.text||msg):""}</p>
+      <button class="btn full" type="submit">${signup?"Create admin account":"Log in"}</button>
+      <button class="sm" type="button" id="switchMode" style="justify-self:center">${signup?"I already have a password":"First time here? Create your admin password"}</button>
+      <a href="#top" class="note" style="text-align:center;text-decoration:underline">Back to store</a>
+    </form></div></div>`;
+  setTimeout(()=>{const p=$("#admPass");if(p)p.focus()},30);
+  $("#switchMode").onclick=()=>renderLogin(null, signup?"login":"signup");
+  $("#loginForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const email=$("#admEmail").value.trim().toLowerCase(), password=$("#admPass").value;
+    if(email!==ADMIN_EMAIL.toLowerCase()){setMsg("loginMsg","Only the store's admin email can log in here.","e");return}
+    const btn=e.submitter||$("#loginForm .btn"); btn.disabled=true;
+    setMsg("loginMsg",signup?"Creating account…":"Logging in…","");
+    try{
+      if(signup){
+        const {data,error}=await sb.auth.signUp({email,password});
+        if(error) throw error;
+        if(data.session){ adm.email=email; await afterLogin(); return; }
+        renderLogin({text:"Account created. If Supabase sent you a confirmation email, open it first. Then log in with your new password.",kind:"s"},"login");
+      } else {
+        const {data,error}=await sb.auth.signInWithPassword({email,password});
+        if(error) throw error;
+        adm.email=data.user.email; await afterLogin();
+      }
+    }catch(err){
+      const m=(err&&err.message)||"";
+      let t = /Invalid login credentials/i.test(m) ? "Wrong email or password. If you haven't set a password yet, use “First time here?” below."
+            : /Email not confirmed/i.test(m) ? "Your account is waiting for email confirmation. Open the confirmation email from Supabase, then log in."
+            : /already registered|already been registered/i.test(m) ? "This email already has an account. Log in with your password instead."
+            : friendlyError(err);
+      setMsg("loginMsg",t,"e"); btn.disabled=false;
+    }
+  });
+}
+async function afterLogin(){
+  if((adm.email||"").toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
+    await sb.auth.signOut(); adm.email=null;
+    return renderLogin({text:"Only the store's admin email can use this page.",kind:"e"});
+  }
+  try{ await loadFromDb(); }catch(e){}
+  renderAdmin();
+}
+
+function renderAdmin(){
+  const p = adm.editing!=null ? byId(adm.editing) : null;
+  const opt=(list,sel)=>list.map(x=>`<option${x===sel?" selected":""}>${esc(x)}</option>`).join("");
+  $("#adminView").innerHTML=`
+  <div class="adm-bar"><div class="wrap">
+    <div class="logo">SAANJH<small style="color:#a8a6a2">Admin · ${esc(adm.email||"")}</small></div>
+    <div class="actions">
+      <a class="btn" href="#top">View store</a>
+      <button class="btn" id="admLogout">Log out</button>
+    </div></div></div>
+  <div class="wrap">
+    <div class="status ok"><span><strong>Live store.</strong> When you save a design here, customers see it straight away. Refresh the store page to check.</span></div>
+    <div class="adm-wrap">
+      <div>
+        <div class="panel">
+          <h2>${p?"Edit design":"Upload a new design"}</h2>
+          <form class="adm-form" id="prodForm">
+            <div>
+              <label for="fImg">Photo</label>
+              <div class="drop-img">
+                <div class="pv" id="pv">${adm.imgPreview?`<img src="${adm.imgPreview}" alt="Preview">`:(p?garment(p):"No photo yet")}</div>
+                <div><input type="file" id="fImg" accept="image/jpeg,image/png,image/webp"><p class="note" style="margin-top:8px">JPG, PNG or WebP. Portrait (3:4) photos look best. Large photos are resized automatically.</p></div>
+              </div>
+            </div>
+            <div><label for="fName">Design name</label><input id="fName" required maxlength="120" value="${p?esc(p.name):""}" placeholder="e.g. Noor Floral Kurta Set"></div>
+            <div class="row">
+              <div><label for="fCat">Category</label><select id="fCat">${opt(CATS,p?p.cat:CATS[0])}</select></div>
+              <div><label for="fCol">Collection</label><select id="fCol">${opt(COLS,p?p.col:COLS[0])}</select></div>
+            </div>
+            <div class="row">
+              <div><label for="fPrice">Price (Rs.)</label><input id="fPrice" type="number" min="1" step="1" required value="${p?p.price:""}"></div>
+              <div><label for="fMrp">Original price, if on sale</label><input id="fMrp" type="number" min="0" step="1" value="${p&&p.mrp?p.mrp:""}"></div>
+            </div>
+            <div class="row">
+              <div><label for="fFabric">Fabric</label><input id="fFabric" maxlength="40" value="${p?esc(p.fabric||""):""}" placeholder="e.g. Cotton mul"></div>
+              <div><label for="fTag">Label on photo</label><select id="fTag">${["","New","Sale","Bestseller"].map(x=>`<option value="${x}"${p&&(p.tag||"")===x?" selected":""}>${x||"None"}</option>`).join("")}</select></div>
+            </div>
+            <div><label for="fDesc">Description</label><textarea id="fDesc" rows="4" maxlength="600" placeholder="Fit, fabric feel, what to pair it with">${p?esc(p.desc||""):""}</textarea></div>
+            <p class="adm-msg" id="prodMsg" aria-live="polite"></p>
+            <div class="row">
+              <button class="btn" type="submit" id="prodSave">${p?"Save changes":"Add to store"}</button>
+              ${p?`<button class="btn ghost" type="button" id="cancelEdit">Cancel</button>`:""}
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>Store settings</h2>
+          <form class="adm-form" id="setForm">
+            <div><label for="sWa">WhatsApp number for orders</label><input id="sWa" inputmode="numeric" pattern="[0-9]{10,15}" required value="${esc(STORE.whatsapp)}"><p class="note" style="margin-top:6px">Country code first, no + or spaces. Example: 919810012345</p></div>
+            <div class="row">
+              <div><label for="sFree">Free shipping above (Rs.)</label><input id="sFree" type="number" min="0" value="${STORE.freeShipAbove}"></div>
+              <div><label for="sShip">Shipping charge (Rs.)</label><input id="sShip" type="number" min="0" value="${STORE.shipping}"></div>
+            </div>
+            <p class="adm-msg" id="setMsg" aria-live="polite"></p>
+            <button class="btn" type="submit">Save settings</button>
+          </form>
+          <form class="adm-form" id="pwForm" style="margin-top:22px;border-top:1px solid var(--line);padding-top:18px">
+            <div><label for="sPass">New admin password</label><input id="sPass" type="password" minlength="8" required autocomplete="new-password"></div>
+            <p class="adm-msg" id="pwMsg" aria-live="polite"></p>
+            <button class="btn ghost" type="submit">Change password</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Your designs (${PRODUCTS.length})</h2>
+        <div class="plist">${PRODUCTS.slice().reverse().map(x=>`
+          <div class="prow">
+            <div class="th">${garment(x)}</div>
+            <div><div class="nm">${esc(x.name)}</div><div class="meta">${esc(x.cat)} · ${esc(x.col)} · ${rs(x.price)}${x.tag?" · "+esc(x.tag):""}</div></div>
+            <div class="acts">
+              <button class="sm" data-adm-edit="${x.id}">Edit</button>
+              <button class="sm danger${adm.delArm===x.id?" confirm":""}" data-adm-del="${x.id}">${adm.delArm===x.id?"Confirm":"Delete"}</button>
+            </div>
+          </div>`).join("") || `<p class="note">No designs yet. Upload your first one on the left.</p>`}
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  $("#admLogout").onclick=async()=>{await sb.auth.signOut();adm.email=null;renderLogin()};
+  const ce=$("#cancelEdit"); if(ce) ce.onclick=()=>{adm.editing=null;adm.imgBlob=null;adm.imgPreview=null;renderAdmin()};
+  $("#fImg").onchange=async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    setMsg("prodMsg","Preparing photo…","");
+    try{const r=await compressImage(f);adm.imgBlob=r.blob;adm.imgPreview=r.preview;$("#pv").innerHTML=`<img src="${r.preview}" alt="Preview">`;setMsg("prodMsg","","")}
+    catch(err){setMsg("prodMsg","This file couldn't be read as a photo. Choose a JPG or PNG.","e")}
+  };
+  $("#prodForm").onsubmit=async e=>{
+    e.preventDefault();
+    if(adm.busy) return;
+    if(!p && !adm.imgBlob){setMsg("prodMsg","Please choose a photo for the design.","e");return}
+    const price=Math.round(+$("#fPrice").value), mrp=Math.round(+$("#fMrp").value)||0;
+    if(mrp && mrp<=price){setMsg("prodMsg","Original price must be higher than the sale price, or leave it empty.","e");return}
+    adm.busy=true; $("#prodSave").disabled=true;
+    setMsg("prodMsg",adm.imgBlob?"Uploading photo…":"Saving…","");
+    let newPath=null;
+    try{
+      let image_url = p ? p.img||null : null, image_path = p ? p.imgPath||null : null;
+      const oldPath = (p && adm.imgBlob) ? p.imgPath : null;
+      if(adm.imgBlob){
+        newPath = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+        const up = await sb.storage.from("designs").upload(newPath, adm.imgBlob, {contentType:"image/jpeg", cacheControl:"31536000", upsert:false});
+        if(up.error) throw up.error;
+        image_url = sb.storage.from("designs").getPublicUrl(newPath).data.publicUrl;
+        image_path = newPath;
+      }
+      setMsg("prodMsg","Saving…","");
+      const row = {
+        name:$("#fName").value.trim(), category:$("#fCat").value, collection:$("#fCol").value,
+        price, mrp: mrp||null, fabric:$("#fFabric").value.trim()||null, tag:$("#fTag").value||null,
+        description:$("#fDesc").value.trim()||null, image_url, image_path
+      };
+      const res = p ? await sb.from("products").update(row).eq("id",p.id).select().single()
+                    : await sb.from("products").insert(row).select().single();
+      if(res.error) throw res.error;
+      if(oldPath) sb.storage.from("designs").remove([oldPath]).catch(()=>{});
+      const was=!!p;
+      adm.editing=null; adm.imgBlob=null; adm.imgPreview=null;
+      await loadFromDb(); renderNav(); renderGrid(); renderAdmin();
+      setMsg("prodMsg", was?"Changes saved. They're live on the store.":"Design added. It's live on the store now.","s");
+    }catch(err){
+      if(newPath) sb.storage.from("designs").remove([newPath]).catch(()=>{});
+      setMsg("prodMsg",friendlyError(err),"e");
+      const b=$("#prodSave"); if(b) b.disabled=false;
+    }finally{ adm.busy=false; }
+  };
+  $("#setForm").onsubmit=async e=>{
+    e.preventDefault();
+    const wa=$("#sWa").value.trim(), free=Math.max(0,Math.round(+$("#sFree").value||0)), ship=Math.max(0,Math.round(+$("#sShip").value||0));
+    setMsg("setMsg","Saving…","");
+    const {error}=await sb.from("settings").update({whatsapp:wa,free_ship_above:free,shipping:ship}).eq("id",1);
+    if(error) return setMsg("setMsg",friendlyError(error),"e");
+    Object.assign(STORE,{whatsapp:wa,freeShipAbove:free,shipping:ship});
+    setMsg("setMsg","Settings saved.","s");
+  };
+  $("#pwForm").onsubmit=async e=>{
+    e.preventDefault();
+    setMsg("pwMsg","Saving…","");
+    const {error}=await sb.auth.updateUser({password:$("#sPass").value});
+    if(error) return setMsg("pwMsg",friendlyError(error),"e");
+    $("#sPass").value=""; setMsg("pwMsg","Password changed. Use the new one next time you log in.","s");
+  };
+}
+$("#adminView").addEventListener("click",async e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.admEdit){adm.editing=+b.dataset.admEdit;adm.imgBlob=null;adm.imgPreview=null;adm.delArm=null;renderAdmin();window.scrollTo(0,0);return}
+  if(b.dataset.admDel){
+    const id=+b.dataset.admDel;
+    if(adm.delArm!==id){adm.delArm=id;renderAdmin();return}
+    const x=byId(id); b.disabled=true; b.textContent="Deleting…";
+    const {error}=await sb.from("products").delete().eq("id",id);
+    if(error){adm.delArm=null;renderAdmin();toast(friendlyError(error));return}
+    if(x&&x.imgPath) sb.storage.from("designs").remove([x.imgPath]).catch(()=>{});
+    if(adm.editing===id) adm.editing=null;
+    adm.delArm=null;
+    cart=cart.filter(l=>l.id!==id); wish=wish.filter(w=>w!==id); store.set("cart",cart); store.set("wish",wish);
+    await loadFromDb(); renderNav(); renderGrid(); renderCart(); renderAdmin(); toast("Design deleted");
+  }
+});
+async function route(){
+  const isAdmin=location.hash==="#admin";
+  document.body.classList.toggle("admin-mode",isAdmin);
+  closeAll();
+  if(!isAdmin) return;
+  window.scrollTo(0,0);
+  if(!sb) return renderNotConnected();
+  $("#adminView").innerHTML=`<div class="login"><p class="note">Loading…</p></div>`;
+  const {data}=await sb.auth.getSession();
+  if(data && data.session){ adm.email=data.session.user.email; await afterLogin(); }
+  else renderLogin();
+}
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body>
+</html>
