@@ -251,6 +251,31 @@ body.admin-mode{padding-bottom:0}
 .adm-msg{font-size:13px;min-height:18px}
 .adm-msg.e{color:var(--rose)}
 .adm-msg.s{color:#3d7a4f}
+.adm-tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:22px 0 22px;overflow-x:auto}
+.adm-tab{padding:12px 18px;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;color:var(--muted)}
+.adm-tab[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+.adm-tab:hover{color:var(--ink)}
+.adm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px}
+.adm-card{display:flex;flex-direction:column;gap:6px}
+.adm-card .th{aspect-ratio:3/4;border:1px solid var(--line);overflow:hidden;background:var(--bg)}
+.adm-card .th svg,.adm-card .th img{width:100%;height:100%;object-fit:cover}
+.adm-card .nm{font-size:14px;line-height:1.3}
+.adm-card .meta{font-size:12.5px;color:var(--muted)}
+.adm-card .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.adm-empty{text-align:center;padding:50px 0;color:var(--muted);display:grid;gap:16px;justify-items:center}
+.dropzone{display:grid!important;grid-template-columns:150px 1fr;gap:20px;align-items:center;border:2px dashed #b9b6b0;background:var(--bg);padding:16px;cursor:pointer;text-transform:none!important;letter-spacing:0!important;font-size:15px!important;color:var(--ink)!important;margin:0!important;transition:border-color .2s,background .2s}
+.dropzone:hover,.dropzone.over{border-color:var(--accent);background:var(--accent-soft)}
+.dropzone .pv{aspect-ratio:3/4;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;font-size:12px;color:var(--muted);text-align:center}
+.dropzone .pv img,.dropzone .pv svg{width:100%;height:100%;object-fit:cover}
+.dz-text{display:grid;gap:6px}
+.dz-text strong{font-size:17px;font-weight:500;color:var(--accent)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.dropzone:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.adm-alert{font-size:14px;min-height:0;padding:0}
+.adm-alert:not(:empty){padding:12px 14px;border-left:3px solid var(--accent);background:var(--accent-soft)}
+.adm-alert.e:not(:empty){border-color:var(--rose);background:#f7e8eb;color:#8a2f40}
+.adm-alert.s:not(:empty){border-color:#3d7a4f;background:#e7f1ea;color:#2c5a3a}
+@media (max-width:560px){.dropzone{grid-template-columns:100px 1fr}}
 @media (max-width:900px){.adm-wrap{grid-template-columns:1fr}.adm-form .row{grid-template-columns:1fr}}
 
 @media (max-width:1100px){
@@ -946,7 +971,7 @@ if(sb){
    Login is Supabase Auth. Only ADMIN_EMAIL can change designs: the database
    rules check this too, so nobody else can edit even with the page's code.
    ===================================================================== */
-const adm = { editing:null, imgBlob:null, imgPreview:null, delArm:null, busy:false, email:null };
+const adm = { tab:"designs", editing:null, imgBlob:null, imgPreview:null, delArm:null, busy:false, email:null };
 
 function compressImage(file){
   return new Promise((res,rej)=>{
@@ -1032,8 +1057,92 @@ async function afterLogin(){
 }
 
 function renderAdmin(){
+  const tab = adm.tab || "designs";
   const p = adm.editing!=null ? byId(adm.editing) : null;
   const opt=(list,sel)=>list.map(x=>`<option${x===sel?" selected":""}>${esc(x)}</option>`).join("");
+  const tabBtn=(id,label)=>`<button class="adm-tab" data-adm-tab="${id}" aria-pressed="${tab===id}">${label}</button>`;
+  let body="";
+
+  if(tab==="designs"){
+    body=`<div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+        <h2 style="margin:0">Your designs (${PRODUCTS.length})</h2>
+        <button class="btn" data-adm-tab="new">+ New design</button>
+      </div>
+      ${PRODUCTS.length ? `<div class="adm-grid">${PRODUCTS.slice().reverse().map(x=>`
+        <div class="adm-card">
+          <div class="th">${garment(x)}</div>
+          <div class="nm">${esc(x.name)}</div>
+          <div class="meta">${esc(x.cat)} · ${rs(x.price)}${x.tag?" · "+esc(x.tag):""}</div>
+          <div class="acts">
+            <button class="sm" data-adm-edit="${x.id}">Edit</button>
+            <button class="sm danger${adm.delArm===x.id?" confirm":""}" data-adm-del="${x.id}">${adm.delArm===x.id?"Tap again to delete":"Delete"}</button>
+          </div>
+        </div>`).join("")}</div>`
+      : `<div class="adm-empty"><p>No designs yet.</p><button class="btn" data-adm-tab="new">+ Upload your first design</button></div>`}
+    </div>`;
+  }
+
+  if(tab==="new"){
+    body=`<div class="panel" style="max-width:760px">
+      <h2>${p?"Edit design":"Upload a new design"}</h2>
+      <form class="adm-form" id="prodForm" novalidate>
+        <div>
+          <label>Photo ${p?"(choose a new one only if you want to replace it)":""}</label>
+          <label class="dropzone" id="dropzone" for="fImg">
+            <div class="pv" id="pv">${adm.imgPreview?`<img src="${adm.imgPreview}" alt="Preview">`:(p?garment(p):`<span>No photo yet</span>`)}</div>
+            <div class="dz-text">
+              <strong>Tap here to choose a photo</strong>
+              <span>or drag a photo onto this box</span>
+              <span class="note">JPG, PNG or WebP. Portrait photos look best. Big photos are made smaller automatically.</span>
+            </div>
+            <input type="file" id="fImg" accept="image/*" class="sr-only">
+          </label>
+        </div>
+        <div><label for="fName">Design name *</label><input id="fName" maxlength="120" value="${p?esc(p.name):""}" placeholder="e.g. Noor Floral Kurta Set"></div>
+        <div class="row">
+          <div><label for="fCat">Category</label><select id="fCat">${opt(CATS,p?p.cat:CATS[0])}</select></div>
+          <div><label for="fCol">Collection</label><select id="fCol">${opt(COLS,p?p.col:COLS[0])}</select></div>
+        </div>
+        <div class="row">
+          <div><label for="fPrice">Price (Rs.) *</label><input id="fPrice" type="number" min="1" step="1" inputmode="numeric" value="${p?p.price:""}" placeholder="e.g. 4500"></div>
+          <div><label for="fMrp">Original price, only if on sale</label><input id="fMrp" type="number" min="0" step="1" inputmode="numeric" value="${p&&p.mrp?p.mrp:""}"></div>
+        </div>
+        <div class="row">
+          <div><label for="fFabric">Fabric</label><input id="fFabric" maxlength="40" value="${p?esc(p.fabric||""):""}" placeholder="e.g. Cotton mul"></div>
+          <div><label for="fTag">Label on photo</label><select id="fTag">${["","New","Sale","Bestseller"].map(x=>`<option value="${x}"${p&&(p.tag||"")===x?" selected":""}>${x||"None"}</option>`).join("")}</select></div>
+        </div>
+        <div><label for="fDesc">Description</label><textarea id="fDesc" rows="4" maxlength="600" placeholder="Fit, fabric feel, what to pair it with">${p?esc(p.desc||""):""}</textarea></div>
+        <p class="adm-alert" id="prodMsg" role="alert" aria-live="assertive"></p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" type="submit" id="prodSave">${p?"Save changes":"Upload design"}</button>
+          <button class="btn ghost" type="button" id="cancelEdit">Cancel</button>
+        </div>
+      </form>
+    </div>`;
+  }
+
+  if(tab==="settings"){
+    body=`<div class="panel" style="max-width:640px">
+      <h2>Store settings</h2>
+      <form class="adm-form" id="setForm">
+        <div><label for="sWa">WhatsApp number for orders</label><input id="sWa" inputmode="numeric" pattern="[0-9]{10,15}" required value="${esc(STORE.whatsapp)}"><p class="note" style="margin-top:6px">Country code first, no + or spaces. Example: 919810012345</p></div>
+        <div class="row">
+          <div><label for="sFree">Free shipping above (Rs.)</label><input id="sFree" type="number" min="0" value="${STORE.freeShipAbove}"></div>
+          <div><label for="sShip">Shipping charge (Rs.)</label><input id="sShip" type="number" min="0" value="${STORE.shipping}"></div>
+        </div>
+        <div><label style="display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)"><input type="checkbox" id="sPhone" style="width:auto;margin-top:4px"${STORE.phoneLogin?" checked":""}> <span>Let customers log in with their mobile number<br><span class="note">Turn this on only after an SMS provider is set up in Supabase. Until then customers see email login only.</span></span></label></div>
+        <p class="adm-msg" id="setMsg" aria-live="polite"></p>
+        <button class="btn" type="submit">Save settings</button>
+      </form>
+      <form class="adm-form" id="pwForm" style="margin-top:22px;border-top:1px solid var(--line);padding-top:18px">
+        <div><label for="sPass">New admin password</label><input id="sPass" type="password" minlength="8" required autocomplete="new-password"></div>
+        <p class="adm-msg" id="pwMsg" aria-live="polite"></p>
+        <button class="btn ghost" type="submit">Change password</button>
+      </form>
+    </div>`;
+  }
+
   $("#adminView").innerHTML=`
   <div class="adm-bar"><div class="wrap">
     <div class="logo">SAANJH<small style="color:#a8a6a2">Admin · ${esc(adm.email||"")}</small></div>
@@ -1042,145 +1151,106 @@ function renderAdmin(){
       <button class="btn" id="admLogout">Log out</button>
     </div></div></div>
   <div class="wrap">
-    <div class="status ok"><span><strong>Live store.</strong> When you save a design here, customers see it straight away. Refresh the store page to check.</span></div>
-    <div class="adm-wrap">
-      <div>
-        <div class="panel">
-          <h2>${p?"Edit design":"Upload a new design"}</h2>
-          <form class="adm-form" id="prodForm">
-            <div>
-              <label for="fImg">Photo</label>
-              <div class="drop-img">
-                <div class="pv" id="pv">${adm.imgPreview?`<img src="${adm.imgPreview}" alt="Preview">`:(p?garment(p):"No photo yet")}</div>
-                <div><input type="file" id="fImg" accept="image/jpeg,image/png,image/webp"><p class="note" style="margin-top:8px">JPG, PNG or WebP. Portrait (3:4) photos look best. Large photos are resized automatically.</p></div>
-              </div>
-            </div>
-            <div><label for="fName">Design name</label><input id="fName" required maxlength="120" value="${p?esc(p.name):""}" placeholder="e.g. Noor Floral Kurta Set"></div>
-            <div class="row">
-              <div><label for="fCat">Category</label><select id="fCat">${opt(CATS,p?p.cat:CATS[0])}</select></div>
-              <div><label for="fCol">Collection</label><select id="fCol">${opt(COLS,p?p.col:COLS[0])}</select></div>
-            </div>
-            <div class="row">
-              <div><label for="fPrice">Price (Rs.)</label><input id="fPrice" type="number" min="1" step="1" required value="${p?p.price:""}"></div>
-              <div><label for="fMrp">Original price, if on sale</label><input id="fMrp" type="number" min="0" step="1" value="${p&&p.mrp?p.mrp:""}"></div>
-            </div>
-            <div class="row">
-              <div><label for="fFabric">Fabric</label><input id="fFabric" maxlength="40" value="${p?esc(p.fabric||""):""}" placeholder="e.g. Cotton mul"></div>
-              <div><label for="fTag">Label on photo</label><select id="fTag">${["","New","Sale","Bestseller"].map(x=>`<option value="${x}"${p&&(p.tag||"")===x?" selected":""}>${x||"None"}</option>`).join("")}</select></div>
-            </div>
-            <div><label for="fDesc">Description</label><textarea id="fDesc" rows="4" maxlength="600" placeholder="Fit, fabric feel, what to pair it with">${p?esc(p.desc||""):""}</textarea></div>
-            <p class="adm-msg" id="prodMsg" aria-live="polite"></p>
-            <div class="row">
-              <button class="btn" type="submit" id="prodSave">${p?"Save changes":"Add to store"}</button>
-              ${p?`<button class="btn ghost" type="button" id="cancelEdit">Cancel</button>`:""}
-            </div>
-          </form>
-        </div>
-
-        <div class="panel">
-          <h2>Store settings</h2>
-          <form class="adm-form" id="setForm">
-            <div><label for="sWa">WhatsApp number for orders</label><input id="sWa" inputmode="numeric" pattern="[0-9]{10,15}" required value="${esc(STORE.whatsapp)}"><p class="note" style="margin-top:6px">Country code first, no + or spaces. Example: 919810012345</p></div>
-            <div class="row">
-              <div><label for="sFree">Free shipping above (Rs.)</label><input id="sFree" type="number" min="0" value="${STORE.freeShipAbove}"></div>
-              <div><label for="sShip">Shipping charge (Rs.)</label><input id="sShip" type="number" min="0" value="${STORE.shipping}"></div>
-            </div>
-            <div><label style="display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)"><input type="checkbox" id="sPhone" style="width:auto;margin-top:4px"${STORE.phoneLogin?" checked":""}> <span>Let customers log in with their mobile number<br><span class="note">Turn this on only after an SMS provider is set up in Supabase. Until then customers see email login only.</span></span></label></div>
-            <p class="adm-msg" id="setMsg" aria-live="polite"></p>
-            <button class="btn" type="submit">Save settings</button>
-          </form>
-          <form class="adm-form" id="pwForm" style="margin-top:22px;border-top:1px solid var(--line);padding-top:18px">
-            <div><label for="sPass">New admin password</label><input id="sPass" type="password" minlength="8" required autocomplete="new-password"></div>
-            <p class="adm-msg" id="pwMsg" aria-live="polite"></p>
-            <button class="btn ghost" type="submit">Change password</button>
-          </form>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2>Your designs (${PRODUCTS.length})</h2>
-        <div class="plist">${PRODUCTS.slice().reverse().map(x=>`
-          <div class="prow">
-            <div class="th">${garment(x)}</div>
-            <div><div class="nm">${esc(x.name)}</div><div class="meta">${esc(x.cat)} · ${esc(x.col)} · ${rs(x.price)}${x.tag?" · "+esc(x.tag):""}</div></div>
-            <div class="acts">
-              <button class="sm" data-adm-edit="${x.id}">Edit</button>
-              <button class="sm danger${adm.delArm===x.id?" confirm":""}" data-adm-del="${x.id}">${adm.delArm===x.id?"Confirm":"Delete"}</button>
-            </div>
-          </div>`).join("") || `<p class="note">No designs yet. Upload your first one on the left.</p>`}
-        </div>
-      </div>
-    </div>
+    <nav class="adm-tabs" aria-label="Admin sections">
+      ${tabBtn("designs","Designs ("+PRODUCTS.length+")")}
+      ${tabBtn("new", p?"Edit design":"+ New design")}
+      ${tabBtn("settings","Settings")}
+    </nav>
+    <div style="padding-bottom:60px">${body}</div>
   </div>`;
 
   $("#admLogout").onclick=async()=>{await sb.auth.signOut();adm.email=null;renderLogin()};
-  const ce=$("#cancelEdit"); if(ce) ce.onclick=()=>{adm.editing=null;adm.imgBlob=null;adm.imgPreview=null;renderAdmin()};
-  $("#fImg").onchange=async e=>{
-    const f=e.target.files[0]; if(!f) return;
-    setMsg("prodMsg","Preparing photo…","");
-    try{const r=await compressImage(f);adm.imgBlob=r.blob;adm.imgPreview=r.preview;$("#pv").innerHTML=`<img src="${r.preview}" alt="Preview">`;setMsg("prodMsg","","")}
-    catch(err){setMsg("prodMsg","This file couldn't be read as a photo. Choose a JPG or PNG.","e")}
-  };
-  $("#prodForm").onsubmit=async e=>{
-    e.preventDefault();
-    if(adm.busy) return;
-    if(!p && !adm.imgBlob){setMsg("prodMsg","Please choose a photo for the design.","e");return}
-    const price=Math.round(+$("#fPrice").value), mrp=Math.round(+$("#fMrp").value)||0;
-    if(mrp && mrp<=price){setMsg("prodMsg","Original price must be higher than the sale price, or leave it empty.","e");return}
-    adm.busy=true; $("#prodSave").disabled=true;
-    setMsg("prodMsg",adm.imgBlob?"Uploading photo…":"Saving…","");
-    let newPath=null;
-    try{
-      let image_url = p ? p.img||null : null, image_path = p ? p.imgPath||null : null;
-      const oldPath = (p && adm.imgBlob) ? p.imgPath : null;
-      if(adm.imgBlob){
-        newPath = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
-        const up = await sb.storage.from("designs").upload(newPath, adm.imgBlob, {contentType:"image/jpeg", cacheControl:"31536000", upsert:false});
-        if(up.error) throw up.error;
-        image_url = sb.storage.from("designs").getPublicUrl(newPath).data.publicUrl;
-        image_path = newPath;
-      }
-      setMsg("prodMsg","Saving…","");
-      const row = {
-        name:$("#fName").value.trim(), category:$("#fCat").value, collection:$("#fCol").value,
-        price, mrp: mrp||null, fabric:$("#fFabric").value.trim()||null, tag:$("#fTag").value||null,
-        description:$("#fDesc").value.trim()||null, image_url, image_path
-      };
-      const res = p ? await sb.from("products").update(row).eq("id",p.id).select().single()
-                    : await sb.from("products").insert(row).select().single();
-      if(res.error) throw res.error;
-      if(oldPath) sb.storage.from("designs").remove([oldPath]).catch(()=>{});
-      const was=!!p;
-      adm.editing=null; adm.imgBlob=null; adm.imgPreview=null;
-      await loadFromDb(); renderNav(); renderGrid(); renderAdmin();
-      setMsg("prodMsg", was?"Changes saved. They're live on the store.":"Design added. It's live on the store now.","s");
-    }catch(err){
-      if(newPath) sb.storage.from("designs").remove([newPath]).catch(()=>{});
-      setMsg("prodMsg",friendlyError(err),"e");
-      const b=$("#prodSave"); if(b) b.disabled=false;
-    }finally{ adm.busy=false; }
-  };
-  $("#setForm").onsubmit=async e=>{
-    e.preventDefault();
-    const wa=$("#sWa").value.trim(), free=Math.max(0,Math.round(+$("#sFree").value||0)), ship=Math.max(0,Math.round(+$("#sShip").value||0));
-    setMsg("setMsg","Saving…","");
-    const phoneLogin=$("#sPhone").checked;
-    const {error}=await sb.from("settings").update({whatsapp:wa,free_ship_above:free,shipping:ship,phone_login:phoneLogin}).eq("id",1);
-    if(error) return setMsg("setMsg",friendlyError(error),"e");
-    Object.assign(STORE,{whatsapp:wa,freeShipAbove:free,shipping:ship,phoneLogin});
-    setMsg("setMsg","Settings saved.","s");
-  };
-  $("#pwForm").onsubmit=async e=>{
-    e.preventDefault();
-    setMsg("pwMsg","Saving…","");
-    const {error}=await sb.auth.updateUser({password:$("#sPass").value});
-    if(error) return setMsg("pwMsg",friendlyError(error),"e");
-    $("#sPass").value=""; setMsg("pwMsg","Password changed. Use the new one next time you log in.","s");
-  };
+
+  if(tab==="new"){
+    const ce=$("#cancelEdit"); ce.onclick=()=>{adm.editing=null;adm.imgBlob=null;adm.imgPreview=null;adm.tab="designs";renderAdmin()};
+    const alertMsg=(t,kind)=>{const el=$("#prodMsg");el.className="adm-alert"+(kind?" "+kind:"");el.textContent=t;if(t)el.scrollIntoView({block:"nearest",behavior:"smooth"})};
+    const takeFile=async f=>{
+      if(!f) return;
+      if(!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|jfif|gif|bmp|avif)$/i.test(f.name)){alertMsg("That file isn't a photo. Choose a JPG or PNG image.","e");return}
+      alertMsg("Preparing photo…","");
+      try{const r=await compressImage(f);adm.imgBlob=r.blob;adm.imgPreview=r.preview;$("#pv").innerHTML=`<img src="${r.preview}" alt="Preview">`;alertMsg("Photo ready.","s")}
+      catch(err){alertMsg(/\.hei[cf]$/i.test(f.name)?"iPhone HEIC photos can't be read here. Save it as JPG first (or take a screenshot of it) and choose that.":"This photo couldn't be opened. Save it as JPG or PNG and try again.","e")}
+    };
+    $("#fImg").onchange=e=>takeFile(e.target.files[0]);
+    const dz=$("#dropzone");
+    dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("over")});
+    dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
+    dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");takeFile(e.dataTransfer.files[0])});
+
+    $("#prodForm").onsubmit=async e=>{
+      e.preventDefault();
+      if(adm.busy) return;
+      const name=$("#fName").value.trim();
+      const price=Math.round(+$("#fPrice").value), mrp=Math.round(+$("#fMrp").value)||0;
+      if(!p && !adm.imgBlob) return alertMsg("Please choose a photo first. Tap the big box at the top.","e");
+      if(!name) {$("#fName").focus();return alertMsg("Please type a name for the design.","e");}
+      if(!(price>0)) {$("#fPrice").focus();return alertMsg("Please enter the price in rupees, for example 4500.","e");}
+      if(mrp && mrp<=price) {$("#fMrp").focus();return alertMsg("Original price must be higher than the sale price. Or leave it empty.","e");}
+      adm.busy=true; $("#prodSave").disabled=true;
+      alertMsg(adm.imgBlob?"Uploading photo… please wait.":"Saving…","");
+      let newPath=null;
+      try{
+        let image_url = p ? p.img||null : null, image_path = p ? p.imgPath||null : null;
+        const oldPath = (p && adm.imgBlob) ? p.imgPath : null;
+        if(adm.imgBlob){
+          newPath = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+          const up = await sb.storage.from("designs").upload(newPath, adm.imgBlob, {contentType:"image/jpeg", cacheControl:"31536000", upsert:false});
+          if(up.error) throw up.error;
+          image_url = sb.storage.from("designs").getPublicUrl(newPath).data.publicUrl;
+          image_path = newPath;
+        }
+        alertMsg("Saving design…","");
+        const row = {
+          name, category:$("#fCat").value, collection:$("#fCol").value,
+          price, mrp: mrp||null, fabric:$("#fFabric").value.trim()||null, tag:$("#fTag").value||null,
+          description:$("#fDesc").value.trim()||null, image_url, image_path
+        };
+        const res = p ? await sb.from("products").update(row).eq("id",p.id).select().single()
+                      : await sb.from("products").insert(row).select().single();
+        if(res.error) throw res.error;
+        if(oldPath) sb.storage.from("designs").remove([oldPath]).catch(()=>{});
+        const was=!!p;
+        adm.editing=null; adm.imgBlob=null; adm.imgPreview=null; adm.tab="designs";
+        await loadFromDb(); renderNav(); renderGrid(); renderAdmin();
+        toast(was?"Changes saved. Live on the store.":"Design uploaded. Live on the store.");
+      }catch(err){
+        console.error("Upload failed:",err);
+        if(newPath) sb.storage.from("designs").remove([newPath]).catch(()=>{});
+        alertMsg(friendlyError(err),"e");
+        const b=$("#prodSave"); if(b) b.disabled=false;
+      }finally{ adm.busy=false; }
+    };
+  }
+
+  if(tab==="settings"){
+    $("#setForm").onsubmit=async e=>{
+      e.preventDefault();
+      const wa=$("#sWa").value.trim(), free=Math.max(0,Math.round(+$("#sFree").value||0)), ship=Math.max(0,Math.round(+$("#sShip").value||0));
+      const phoneLogin=$("#sPhone").checked;
+      setMsg("setMsg","Saving…","");
+      const {error}=await sb.from("settings").update({whatsapp:wa,free_ship_above:free,shipping:ship,phone_login:phoneLogin}).eq("id",1);
+      if(error) return setMsg("setMsg",friendlyError(error),"e");
+      Object.assign(STORE,{whatsapp:wa,freeShipAbove:free,shipping:ship,phoneLogin});
+      setMsg("setMsg","Settings saved.","s");
+    };
+    $("#pwForm").onsubmit=async e=>{
+      e.preventDefault();
+      setMsg("pwMsg","Saving…","");
+      const {error}=await sb.auth.updateUser({password:$("#sPass").value});
+      if(error) return setMsg("pwMsg",friendlyError(error),"e");
+      $("#sPass").value=""; setMsg("pwMsg","Password changed. Use the new one next time you log in.","s");
+    };
+  }
 }
 $("#adminView").addEventListener("click",async e=>{
   const b=e.target.closest("button"); if(!b) return;
-  if(b.dataset.admEdit){adm.editing=+b.dataset.admEdit;adm.imgBlob=null;adm.imgPreview=null;adm.delArm=null;renderAdmin();window.scrollTo(0,0);return}
+  if(b.dataset.admTab){
+    const t=b.dataset.admTab;
+    if(t==="new" && !b.classList.contains("adm-tab")){adm.editing=null;adm.imgBlob=null;adm.imgPreview=null}
+    if(t!=="new"){adm.delArm=null}
+    adm.tab=t; renderAdmin(); window.scrollTo(0,0); return;
+  }
+  if(b.dataset.admEdit){adm.editing=+b.dataset.admEdit;adm.imgBlob=null;adm.imgPreview=null;adm.delArm=null;adm.tab="new";renderAdmin();window.scrollTo(0,0);return}
   if(b.dataset.admDel){
     const id=+b.dataset.admDel;
     if(adm.delArm!==id){adm.delArm=id;renderAdmin();return}
@@ -1194,6 +1264,7 @@ $("#adminView").addEventListener("click",async e=>{
     await loadFromDb(); renderNav(); renderGrid(); renderCart(); renderAdmin(); toast("Design deleted");
   }
 });
+
 async function route(){
   const isAdmin=ADMIN_PAGE||location.hash==="#admin";
   document.body.classList.toggle("admin-mode",isAdmin);
